@@ -33,16 +33,16 @@ public class NexaPlay {
         private JTextField searchField;
 
         public Window(int width, int height) {
-            this(width, height, "Player");
+            this(width, height, "Guest");
         }
 
         public Window(int width, int height, String username) {
             this.appWidth = width;
             this.appHeight = height;
-            this.currentUsername = (username != null && !username.trim().isEmpty()) ? username : "Player";
+            this.currentUsername = (username != null && !username.trim().isEmpty()) ? username : "Guest";
 
             setTitle("NexaPlay - Game Store & Launcher");
-            setIconImage(Toolkit.getDefaultToolkit().getImage(Theme.resolveImageFile("NexaPlay Icon.png") != null ? Theme.resolveImageFile("NexaPlay Icon.png").getAbsolutePath() : ""));
+            setIconImage(Theme.createTransparentLogoIcon(32, 32).getImage());
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setSize(width, height);
             setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -105,11 +105,11 @@ public class NexaPlay {
                     BorderFactory.createEmptyBorder(12, 24, 12, 24)
             ));
 
-            // Left side brand logo & title
+            // Left side brand logo & title with 100% transparent vector emblem
             JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
             left.setOpaque(false);
 
-            JLabel logoLabel = new JLabel(Theme.createRoundedIcon("NexaPlay Icon.png", 40, 40, 10));
+            JLabel logoLabel = new JLabel(Theme.createTransparentLogoIcon(42, 42));
 
             JPanel titleWrap = new JPanel();
             titleWrap.setLayout(new BoxLayout(titleWrap, BoxLayout.Y_AXIS));
@@ -280,8 +280,7 @@ public class NexaPlay {
             int cartCount = DatabaseManager.getInstance().getUserCart(currentUsername).size();
             String cartLabel = cartCount > 0 ? "Cart (" + cartCount + ")" : "Cart";
             cartNavItem = new NavItem(cartLabel, cartNavItem.isActive(), () -> showCard(CARD_CART));
-            
-            // Re-render store cards button state
+
             refreshStoreCards();
             refreshLibraryCards();
         }
@@ -329,7 +328,6 @@ public class NexaPlay {
 
             for (GameItem item : catalog) {
                 if (owned.contains(item.getTitle()) || item.getPrice() == 0.0) {
-                    // Automatically own free games
                     DatabaseManager.getInstance().addToUserLibrary(currentUsername, item.getTitle());
                     
                     GameCard libCard = new GameCard(
@@ -389,7 +387,7 @@ public class NexaPlay {
         SwingUtilities.invokeLater(() -> {
             GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
             Rectangle bounds = env.getMaximumWindowBounds();
-            new Window(bounds.width, bounds.height, "Player");
+            new Window(bounds.width, bounds.height, "Guest");
         });
     }
 }

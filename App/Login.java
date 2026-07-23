@@ -10,7 +10,7 @@ public class Login extends JFrame {
         setTitle("NexaPlay - Sign In");
         setSize(width, height);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setIconImage(Toolkit.getDefaultToolkit().getImage(Theme.resolveImageFile("NexaPlay Icon.png") != null ? Theme.resolveImageFile("NexaPlay Icon.png").getAbsolutePath() : ""));
+        setIconImage(Theme.createTransparentLogoIcon(32, 32).getImage());
         setLocationRelativeTo(null);
         Theme.applyRoot(this);
 
@@ -51,8 +51,8 @@ public class Login extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 0;
 
-        // Header Logo & Text
-        JLabel logo = new JLabel(Theme.createRoundedIcon("NexaPlay Icon.png", 54, 54, 14));
+        // Header Transparent Vector Logo & Text
+        JLabel logo = new JLabel(Theme.createTransparentLogoIcon(54, 54));
         logo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JLabel title = new JLabel("Welcome Back", SwingConstants.CENTER);

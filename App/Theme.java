@@ -1,6 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -67,7 +67,54 @@ public final class Theme {
         return null;
     }
 
-    // Creates a rounded Icon from image file OR falls back to Procedural Brand Theme Graphics
+    // Creates a 100% Transparent Vector Brand Logo Icon (No Square Bounding Boxes)
+    public static ImageIcon createTransparentLogoIcon(int width, int height) {
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = image.createGraphics();
+        setupGraphics(g2);
+
+        int cx = width / 2;
+        int cy = height / 2;
+
+        // Draw Glowing Controller Body (Cyan & Indigo Gradient)
+        GradientPaint gp = new GradientPaint(0, 0, ACCENT_CYAN, width, height, ACCENT_LIGHT);
+        g2.setPaint(gp);
+        g2.setStroke(new BasicStroke(2.6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+        // Controller Outline Path
+        Path2D p = new Path2D.Float();
+        p.moveTo(cx - 15, cy - 9);
+        p.curveTo(cx - 9, cy - 15, cx + 9, cy - 15, cx + 15, cy - 9);
+        p.curveTo(cx + 19, cy - 4, cx + 19, cy + 11, cx + 13, cy + 13);
+        p.curveTo(cx + 9, cy + 15, cx + 4, cy + 5, cx, cy + 5);
+        p.curveTo(cx - 4, cy + 5, cx - 8, cy + 15, cx - 13, cy + 13);
+        p.curveTo(cx - 19, cy + 11, cx - 19, cy - 4, cx - 15, cy - 9);
+        p.closePath();
+
+        g2.draw(p);
+
+        // D-Pad Cross (Left Side)
+        g2.setStroke(new BasicStroke(2.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.drawLine(cx - 9, cy - 3, cx - 9, cy + 3);
+        g2.drawLine(cx - 12, cy, cx - 6, cy);
+
+        // Action Buttons (Right Side)
+        g2.fill(new Ellipse2D.Float(cx + 7, cy - 4, 3, 3));
+        g2.fill(new Ellipse2D.Float(cx + 11, cy, 3, 3));
+
+        // Center Play Symbol
+        g2.setColor(ACCENT_CYAN);
+        Path2D playTri = new Path2D.Float();
+        playTri.moveTo(cx - 2, cy - 3);
+        playTri.lineTo(cx + 3, cy);
+        playTri.lineTo(cx - 2, cy + 3);
+        playTri.closePath();
+        g2.fill(playTri);
+
+        g2.dispose();
+        return new ImageIcon(image);
+    }
+
     public static ImageIcon createRoundedIcon(String path, int width, int height, int radius) {
         File imgFile = resolveImageFile(path);
         if (imgFile != null) {
