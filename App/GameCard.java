@@ -28,13 +28,13 @@ public class GameCard extends JPanel {
         setPreferredSize(new Dimension(280, 320));
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
-        // Thumbnail with price overlay
+        // Procedural Brand Artwork Thumbnail
         JPanel thumbContainer = new JPanel(new BorderLayout());
         thumbContainer.setOpaque(false);
 
         JLabel imageLabel = new JLabel();
         imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        imageLabel.setIcon(Theme.createRoundedIcon(item.getLogoPath(), 256, 140, 12));
+        imageLabel.setIcon(BrandThemePainter.createBrandBanner(item.getTitle(), 256, 140, 12));
         thumbContainer.add(imageLabel, BorderLayout.CENTER);
 
         add(thumbContainer, BorderLayout.NORTH);

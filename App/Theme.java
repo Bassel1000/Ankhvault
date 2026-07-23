@@ -67,46 +67,34 @@ public final class Theme {
         return null;
     }
 
-    // Creates a rounded cropped Image from source path or placeholder
+    // Creates a rounded Icon from image file OR falls back to Procedural Brand Theme Graphics
     public static ImageIcon createRoundedIcon(String path, int width, int height, int radius) {
-        BufferedImage output = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = output.createGraphics();
-        setupGraphics(g2);
-
-        boolean loaded = false;
         File imgFile = resolveImageFile(path);
         if (imgFile != null) {
             try {
                 ImageIcon raw = new ImageIcon(imgFile.getAbsolutePath());
                 if (raw.getIconWidth() > 0 && raw.getIconHeight() > 0) {
+                    BufferedImage output = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+                    Graphics2D g2 = output.createGraphics();
+                    setupGraphics(g2);
                     g2.setClip(new RoundRectangle2D.Float(0, 0, width, height, radius, radius));
                     g2.drawImage(raw.getImage(), 0, 0, width, height, null);
-                    loaded = true;
+                    g2.dispose();
+                    return new ImageIcon(output);
                 }
             } catch (Exception ignored) {}
         }
 
-        if (!loaded) {
-            // Draw sleek placeholder gradient image
-            g2.setClip(new RoundRectangle2D.Float(0, 0, width, height, radius, radius));
-            GradientPaint gp = new GradientPaint(0, 0, BG_ELEVATED, width, height, BG_HOVER);
-            g2.setPaint(gp);
-            g2.fillRect(0, 0, width, height);
-            
-            g2.setColor(BORDER_STROKE);
-            g2.setStroke(new BasicStroke(1.5f));
-            g2.draw(new RoundRectangle2D.Float(1, 1, width - 2, height - 2, radius, radius));
-            
-            g2.setColor(ACCENT_CYAN);
-            g2.setFont(TITLE_H3);
-            FontMetrics fm = g2.getFontMetrics();
-            String text = "NexaPlay";
-            int tx = (width - fm.stringWidth(text)) / 2;
-            int ty = (height + fm.getAscent()) / 2 - 4;
-            g2.drawString(text, tx, ty);
+        // Derive title from filename for brand theme artwork fallback
+        String title = "NexaPlay";
+        if (path != null) {
+            if (path.toLowerCase().contains("tic")) title = "Tic Tac Toe";
+            else if (path.toLowerCase().contains("snake")) title = "Snake";
+            else if (path.toLowerCase().contains("pong")) title = "Pong";
+            else if (path.toLowerCase().contains("hangman")) title = "Hangman";
+            else if (path.toLowerCase().contains("guess")) title = "Guess The Number";
         }
 
-        g2.dispose();
-        return new ImageIcon(output);
+        return BrandThemePainter.createBrandBanner(title, width, height, radius);
     }
 }
