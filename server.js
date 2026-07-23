@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -8,7 +7,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// In-Memory Catalog (Connects to Cloud DB)
+const TREASURY_SOL = "68MPta3vW2cNi2JYBtYPVLk8RFUHE5mAuAKppkik9mtb";
+const TREASURY_EVM = "0x58f9f0e213140b8f59382a8b195bcbe2e8e8d07a";
+
 const storeCatalog = [
   { id: "ttt-01", title: "Tic Tac Toe", price: 0.00, genre: "Strategy & Puzzle", developer: "NexaPlay Studios" },
   { id: "snk-02", title: "Snake", price: 0.00, genre: "Arcade Classic", developer: "NexaPlay Studios" },
@@ -17,17 +18,14 @@ const storeCatalog = [
   { id: "gtn-05", title: "Guess The Number", price: 14.99, genre: "Mind Challenge", developer: "Logic Lab" }
 ];
 
-// Health Check API
 app.get('/api/v1/health', (req, res) => {
-  res.json({ status: "online", platform: "NexaPlay Cloud", version: "3.0.0", timestamp: new Date().toISOString() });
+  res.json({ status: "online", platform: "NexaPlay Cloud", version: "3.0.0", treasurySol: TREASURY_SOL, treasuryEvm: TREASURY_EVM });
 });
 
-// Games Catalog API
 app.get('/api/v1/games', (req, res) => {
   res.json({ success: true, count: storeCatalog.length, games: storeCatalog });
 });
 
-// Developer Game Submission API (5% Fee Model)
 app.post('/api/v1/dev/submit', (req, res) => {
   const { title, price, genre, developer, walletAddress } = req.body;
   if (!title || price === undefined || !walletAddress) {
@@ -48,7 +46,6 @@ app.post('/api/v1/dev/submit', (req, res) => {
   res.status(201).json({ success: true, message: "Game submitted successfully! Pending malware scan.", game: newGame });
 });
 
-// x402 Payment Verification API
 app.post('/api/v1/checkout/x402', (req, res) => {
   const { txHash, token, amount } = req.body;
   if (!txHash) {
@@ -63,11 +60,12 @@ app.post('/api/v1/checkout/x402', (req, res) => {
     amountVerified: amount,
     nexaFeeCutPercent: 5.0,
     devPayoutPercent: 95.0,
+    treasurySol: TREASURY_SOL,
+    treasuryEvm: TREASURY_EVM,
     status: "verified_on_chain"
   });
 });
 
-// Futuristic Web Portal Landing Page for nexaplay.opsh.io
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -94,7 +92,8 @@ app.get('/', (req, res) => {
         .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1100px; width: 100%; margin-top: 60px; text-align: left; }
         .card { background: #161B26; padding: 28px; border-radius: 16px; border: 1px solid #2A3447; }
         .card h3 { font-size: 20px; color: #06B6D4; margin-bottom: 12px; }
-        .card p { font-size: 14px; color: #94A3B8; margin-bottom: 0; }
+        .card p { font-size: 14px; color: #94A3B8; margin-bottom: 0; word-break: break-all; }
+        .vault { font-family: monospace; font-size: 12px; color: #818CF8; margin-top: 8px; }
         footer { padding: 24px; text-align: center; font-size: 14px; color: #94A3B8; border-top: 1px solid #2A3447; }
       </style>
     </head>
@@ -120,17 +119,19 @@ app.get('/', (req, res) => {
           </div>
           <div class="card">
             <h3>⚡ Stablecoin x402 Protocol</h3>
-            <p>Accept USDT, USDC, and USDG payments on-chain with zero chargeback risks and sub-second verification.</p>
+            <p>Accept USDT, USDC, and USDG on-chain.</p>
+            <div class="vault">EVM Vault: ${TREASURY_EVM}</div>
+            <div class="vault">Solana Vault: ${TREASURY_SOL}</div>
           </div>
           <div class="card">
             <h3>🔒 Enterprise Security</h3>
-            <p>SHA-256 salted password hashing and AES-256 binary file database encryption.</p>
+            <p>SHA-256 salted password hashing and AES-256 binary database file encryption.</p>
           </div>
         </div>
       </section>
 
       <footer>
-        &copy; 2026 NexaPlay Platform Inc. Powered by OpenShip.io & Java 26.
+        &copy; 2026 NexaPlay Platform Inc. Java 26.
       </footer>
     </body>
     </html>
@@ -138,5 +139,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  System.out.println ? console.log(`NexaPlay Server listening on port ${PORT}`) : console.log(`NexaPlay Server listening on port ${PORT}`);
+  console.log(`NexaPlay Server listening on port ${PORT}`);
 });
