@@ -12,11 +12,11 @@ const TREASURY_SOL = process.env.TREASURY_SOL || "68MPta3vW2cNi2JYBtYPVLk8RFUHE5
 const TREASURY_EVM = process.env.TREASURY_EVM || "0x58f9f0e213140b8f59382a8b195bcbe2e8e8d07a";
 
 const storeCatalog = [
-  { id: "ttt-01", title: "Tic Tac Toe", price: 0.00, genre: "Strategy & Puzzle", developer: "Duat Studio" },
-  { id: "snk-02", title: "Snake", price: 0.00, genre: "Arcade Classic", developer: "Duat Studio" },
-  { id: "png-03", title: "Pong", price: 4.99, genre: "2-Player Arcade", developer: "Retro Bytes" },
-  { id: "hng-04", title: "Hangman", price: 9.99, genre: "Word & Logic", developer: "WordSmith Games" },
-  { id: "gtn-05", title: "Guess The Number", price: 14.99, genre: "Mind Challenge", developer: "Logic Lab" }
+  { id: "kemet-01", title: "Shadow of Kemet", price: 14.99, genre: "Action RPG / Fantasy", developer: "Duat Studio" },
+  { id: "racer-02", title: "Nomad Racer", price: 0.00, genre: "Cyberpunk Racing", developer: "Apex Velocity" },
+  { id: "aegis-03", title: "Aegis Protocol", price: 9.99, genre: "Sci-Fi Tactics", developer: "Ironclad Interactive" },
+  { id: "duat-04", title: "Chronicles of Duat", price: 19.99, genre: "Mythic Adventure", developer: "Duat Studio" },
+  { id: "neon-05", title: "Neon Odyssey", price: 4.99, genre: "Synthwave Platformer", developer: "SynthWave Interactive" }
 ];
 
 app.get('/api/v1/health', (req, res) => {

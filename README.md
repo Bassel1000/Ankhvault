@@ -59,12 +59,10 @@ Ankhvault features a custom dual-palette design system tailored for modern high-
   - **Live Store Cart**: Interactive cart tab (`🛒 Cart (X)`) with dynamic subtotal calculations and badge counter.
   - **USD Stablecoin x402 Web3 Checkout**: Built-in payment modal supporting **USDT (Tether)**, **USDC (USD Coin)**, and **USDG (Global Dollar)** with 1:1 USD settlement and instant wallet address copying.
 
-- 🕹️ **5 Overhauled Built-In Games**:
-  1. **Tic Tac Toe**: Interactive 3x3 strategic grid with turn indicators, vector symbols ('X' / 'O'), and reset logic.
-  2. **Snake**: Dark grid arcade game with smooth snake physics, real-time score tracking, and custom game-over overlays.
-  3. **Pong**: 2-Player neon arcade pong with responsive paddle controls (`W/S` & `Up/Down`), glowing ball collisions, and active scoreboard.
-  4. **Hangman**: Vector canvas rendering of gallows & stick figure with spaced letter slots and mistake limit indicators.
-  5. **Guess The Number**: Brain puzzle game with step-by-step feedback (`Too High ⬇️`, `Too Low ⬆️`) and attempt tracking (`5/5`).
+- 🚀 **Production Game Downloader & Launch Engine (`GameInstaller.java`)**:
+  - **Automated Package Extraction**: Downloads compressed game build archives over HTTPS/CDN directly into `%LOCALAPPDATA%/Ankhvault/Games/`.
+  - **Native Process Execution**: Discovers executable binaries (`.exe` / `.bat`) and boots game processes with isolated working directories via `ProcessBuilder`.
+  - **Store Catalog**: Features flagship titles including *Shadow of Kemet*, *Nomad Racer*, *Aegis Protocol*, *Chronicles of Duat*, and *Neon Odyssey*.
 
 ---
 

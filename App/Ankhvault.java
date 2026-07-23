@@ -6,7 +6,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import Snake.code.Snake;
+import java.io.File;
 
 public class Ankhvault {
 
@@ -357,29 +357,48 @@ public class Ankhvault {
         }
 
         private void launchGame(String title) {
-            ToastManager.showToast(this, "Launching " + title + "...");
-            switch (title) {
-                case "Tic Tac Toe":
-                    new TicTacToeGame();
-                    break;
-                case "Guess The Number":
-                    new GuessTheNumberGame();
-                    break;
-                case "Hangman":
-                    new HangmanGame();
-                    break;
-                case "Snake":
-                    JFrame snakeFrame = new Snake();
-                    snakeFrame.setVisible(true);
-                    break;
-                case "Pong":
-                    JFrame pongFrame = new JFrame("Pong");
-                    pongFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                    pongFrame.getContentPane().add(new PongGame());
-                    pongFrame.pack();
-                    pongFrame.setLocationRelativeTo(null);
-                    pongFrame.setVisible(true);
-                    break;
+            File installDir = GameInstaller.getInstallDirectory(title);
+            File exe = GameInstaller.findExecutable(installDir);
+
+            if (exe != null && exe.exists()) {
+                ToastManager.showToast(this, "Launching " + title + "...");
+                boolean launched = GameInstaller.launchExecutable(exe);
+                if (!launched) {
+                    JOptionPane.showMessageDialog(this, "Could not start process for " + exe.getName(), "Launch Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                int option = JOptionPane.showConfirmDialog(
+                        this,
+                        title + " build package is not installed on your system.\nWould you like to download and install " + title + " now?",
+                        "Install Game Package",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.QUESTION_MESSAGE
+                );
+
+                if (option == JOptionPane.YES_OPTION) {
+                    ToastManager.showToast(this, "Preparing download for " + title + "...");
+                    String dummyDownloadUrl = "https://cdn.ankhvault.io/builds/" + title.toLowerCase().replaceAll("[^a-z0-9]", "_") + ".zip";
+                    
+                    GameInstaller.downloadAndInstallGame(title, dummyDownloadUrl, new GameInstaller.DownloadProgressCallback() {
+                        @Override
+                        public void onProgress(int percentage, String status) {
+                            ToastManager.showToast(Window.this, status);
+                        }
+
+                        @Override
+                        public void onComplete(File installedExe) {
+                            ToastManager.showToast(Window.this, "Installation complete for " + title + "!");
+                            if (installedExe != null && installedExe.exists()) {
+                                GameInstaller.launchExecutable(installedExe);
+                            }
+                        }
+
+                        @Override
+                        public void onError(String errorMessage) {
+                            JOptionPane.showMessageDialog(Window.this, errorMessage, "Download Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    });
+                }
             }
         }
     }

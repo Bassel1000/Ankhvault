@@ -5,8 +5,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * Real Game Download & Installation Engine
- * Downloads game build packages over HTTP/HTTPS and unzips them to LocalAppData/Ankhvault/Games/<GameId>/
+ * Real Game Download, Installation & Launch Engine for Ankhvault
+ * Downloads game build packages over HTTP/HTTPS, extracts them to LocalAppData/Ankhvault/Games/<GameId>/,
+ * and launches native executables safely via ProcessBuilder.
  */
 public class GameInstaller {
     public interface DownloadProgressCallback {
@@ -20,9 +21,47 @@ public class GameInstaller {
         if (localAppData == null || localAppData.isEmpty()) {
             localAppData = System.getProperty("user.home");
         }
-        File baseDir = new File(localAppData, "Ankhvault/Games/" + gameId.toLowerCase());
+        File baseDir = new File(localAppData, "Ankhvault/Games/" + gameId.toLowerCase().replaceAll("[^a-z0-9]", "_"));
         if (!baseDir.exists()) baseDir.mkdirs();
         return baseDir;
+    }
+
+    public static File findExecutable(File installDir) {
+        if (installDir == null || !installDir.exists()) return null;
+        File[] files = installDir.listFiles();
+        if (files == null) return null;
+
+        for (File f : files) {
+            if (f.isFile() && (f.getName().toLowerCase().endsWith(".exe") || f.getName().toLowerCase().endsWith(".bat"))) {
+                return f;
+            }
+        }
+        for (File f : files) {
+            if (f.isDirectory()) {
+                File subExe = findExecutable(f);
+                if (subExe != null) return subExe;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isGameInstalled(String gameId) {
+        File dir = getInstallDirectory(gameId);
+        File exe = findExecutable(dir);
+        return exe != null && exe.exists();
+    }
+
+    public static boolean launchExecutable(File executable) {
+        if (executable == null || !executable.exists()) return false;
+        try {
+            ProcessBuilder pb = new ProcessBuilder(executable.getAbsolutePath());
+            pb.directory(executable.getParentFile());
+            pb.start();
+            return true;
+        } catch (Exception e) {
+            System.err.println("Failed to launch game executable: " + e.getMessage());
+            return false;
+        }
     }
 
     public static void downloadAndInstallGame(String gameId, String downloadUrlStr, DownloadProgressCallback callback) {
@@ -39,7 +78,7 @@ public class GameInstaller {
                 InputStream input = conn.getInputStream();
 
                 callback.onProgress(20, "Downloading Game Package...");
-                File zipFile = new File(installDir, gameId + ".zip");
+                File zipFile = new File(installDir, gameId.replaceAll("[^a-zA-Z0-9]", "_") + ".zip");
                 FileOutputStream output = new FileOutputStream(zipFile);
 
                 byte[] data = new byte[8192];

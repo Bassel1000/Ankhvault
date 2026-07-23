@@ -236,11 +236,11 @@ public class CartPanel extends JPanel {
 
     public static List<GameItem> getStoreCatalog() {
         List<GameItem> list = new ArrayList<>();
-        list.add(new GameItem("tic", "Tic Tac Toe", "Tic Tac Toe Logo.jpeg", 0.00, "Puzzle / Classic", "Classic strategy grid game for two players."));
-        list.add(new GameItem("snake", "Snake", "Snake Game Logo.jpeg", 4.99, "Arcade / Retro", "Retro snake game with smooth movement and live scoring."));
-        list.add(new GameItem("guess", "Guess The Number", "Guess the Number Logo.jpeg", 4.99, "Casual", "Challenge your mind to guess the hidden number in 5 tries."));
-        list.add(new GameItem("pong", "Pong", "Pong Game Logo.jpeg", 9.99, "Arcade", "Neon 2-player arcade pong with responsive paddle controls."));
-        list.add(new GameItem("hangman", "Hangman", "Hangman Logo.jpeg", 14.99, "Word / Trivia", "Test your vocabulary skills against the gallows."));
+        list.add(new GameItem("kemet-01", "Shadow of Kemet", "kemet_logo.png", 14.99, "Action RPG / Fantasy", "Uncover ancient secrets in a dark mythic world of shadow and gold."));
+        list.add(new GameItem("racer-02", "Nomad Racer", "racer_logo.png", 0.00, "Cyberpunk Racing", "High-octane futuristic street racing across neon desert highways."));
+        list.add(new GameItem("aegis-03", "Aegis Protocol", "aegis_logo.png", 9.99, "Sci-Fi Tactics", "Command tactical squads in intense turn-based cyberpunk warfare."));
+        list.add(new GameItem("duat-04", "Chronicles of Duat", "duat_logo.png", 19.99, "Mythic Adventure", "Explore the underworld realm and conquer celestial titans."));
+        list.add(new GameItem("neon-05", "Neon Odyssey", "neon_logo.png", 4.99, "Synthwave Platformer", "Fast-paced platformer with synthwave soundtracks and dynamic lighting."));
         return list;
     }
 }
