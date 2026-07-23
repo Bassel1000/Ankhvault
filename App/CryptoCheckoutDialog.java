@@ -26,7 +26,7 @@ public class CryptoCheckoutDialog extends JDialog {
         this.totalPrice = totalPrice;
         this.callback = callback;
 
-        setSize(540, 620);
+        setSize(540, 640);
         setLocationRelativeTo(parent);
         setResizable(false);
         getContentPane().setBackground(Theme.BG_ROOT);
@@ -169,7 +169,7 @@ public class CryptoCheckoutDialog extends JDialog {
         JPanel walletRow = new JPanel(new BorderLayout(8, 0));
         walletRow.setOpaque(false);
 
-        JTextField walletAddressField = new JTextField("0x71C849B3E2F40A1079543NEXASTABLECOIN402");
+        JTextField walletAddressField = new JTextField(x402Web3Client.TREASURY_WALLET_EVM);
         walletAddressField.setEditable(false);
         walletAddressField.setBackground(Theme.BG_ELEVATED);
         walletAddressField.setForeground(Theme.ACCENT_LIGHT);
@@ -292,7 +292,6 @@ public class CryptoCheckoutDialog extends JDialog {
     }
 
     private void updateCryptoAmount() {
-        // 1:1 Pegged USD Stablecoins (USDT, USDC, USDG)
         cryptoAmountLabel.setText(String.format("%.2f %s", totalPrice, selectedToken));
         if (verifyCryptoBtn != null) {
             verifyCryptoBtn.setText("⚡ Verify " + selectedToken + " Payment");
@@ -300,12 +299,22 @@ public class CryptoCheckoutDialog extends JDialog {
     }
 
     private void verifyCryptoPayment() {
+        String txHash = txHashField.getText().trim();
         verifyCryptoBtn.setEnabled(false);
         verifyCryptoBtn.setText("⏳ Verifying " + selectedToken + " On-Chain Block...");
 
-        Timer timer = new Timer(1800, e -> {
-            ToastManager.showToast((JFrame) getOwner(), "⚡ " + selectedToken + " Payment Verified!");
-            completePurchase();
+        // Perform real on-chain transaction verification
+        x402Web3Client.VerificationResult result = x402Web3Client.verifyOnChainTransaction(txHash, selectedToken, totalPrice);
+
+        Timer timer = new Timer(1200, e -> {
+            if (result.success) {
+                ToastManager.showToast((JFrame) getOwner(), "⚡ " + selectedToken + " Payment Verified On-Chain!");
+                completePurchase();
+            } else {
+                ToastManager.showToast((JFrame) getOwner(), "❌ " + result.message);
+                verifyCryptoBtn.setEnabled(true);
+                verifyCryptoBtn.setText("⚡ Verify " + selectedToken + " Payment");
+            }
         });
         timer.setRepeats(false);
         timer.start();
