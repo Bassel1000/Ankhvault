@@ -7,8 +7,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-const TREASURY_SOL = "68MPta3vW2cNi2JYBtYPVLk8RFUHE5mAuAKppkik9mtb";
-const TREASURY_EVM = "0x58f9f0e213140b8f59382a8b195bcbe2e8e8d07a";
+// Load Environment Variables with Fallbacks
+const TREASURY_SOL = process.env.TREASURY_SOL || "68MPta3vW2cNi2JYBtYPVLk8RFUHE5mAuAKppkik9mtb";
+const TREASURY_EVM = process.env.TREASURY_EVM || "0x58f9f0e213140b8f59382a8b195bcbe2e8e8d07a";
 
 const storeCatalog = [
   { id: "ttt-01", title: "Tic Tac Toe", price: 0.00, genre: "Strategy & Puzzle", developer: "NexaPlay Studios" },

@@ -1,6 +1,31 @@
-bin/
+# Java Compiled Binaries & Directories
 *.class
-.DS_Store
-.idea/
+bin/
+out/
+target/
+
+# Node.js & Server Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database & Sensitive Persistent Data
+*.db
+nexa_database.db
+*.sqlite
 *.log
-nexa_database.txt
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.production
+*.pem
+*.key
+
+# IDE & OS System Files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
