@@ -14,13 +14,13 @@ public class CryptoCheckoutDialog extends JDialog {
     private final PaymentSuccessCallback callback;
     private final String username;
 
-    private String selectedToken = "SOL";
+    private String selectedToken = "USDT";
     private final JLabel cryptoAmountLabel = new JLabel();
     private final JTextField txHashField = new JTextField();
     private ModernButton verifyCryptoBtn;
 
     public CryptoCheckoutDialog(JFrame parent, String username, List<GameItem> cartItems, double totalPrice, PaymentSuccessCallback callback) {
-        super(parent, "NexaPlay Checkout - Payment Required (x402)", true);
+        super(parent, "NexaPlay Checkout - Stablecoin x402 Payment Required", true);
         this.username = username;
         this.cartItems = cartItems;
         this.totalPrice = totalPrice;
@@ -58,7 +58,7 @@ public class CryptoCheckoutDialog extends JDialog {
         tabbedPane.setForeground(Theme.TEXT_PRIMARY);
         tabbedPane.setFont(Theme.TITLE_H3);
 
-        tabbedPane.addTab("⚡ Crypto x402 Web3", createCryptoPanel());
+        tabbedPane.addTab("💵 Stablecoins (x402)", createCryptoPanel());
         tabbedPane.addTab("💳 Credit Card", createCardPanel());
 
         add(tabbedPane, BorderLayout.CENTER);
@@ -87,11 +87,11 @@ public class CryptoCheckoutDialog extends JDialog {
         x402Banner.setOpaque(false);
         x402Banner.setBorder(BorderFactory.createEmptyBorder(10, 14, 10, 14));
 
-        JLabel h402Label = new JLabel("HTTP 402: PAYMENT REQUIRED");
+        JLabel h402Label = new JLabel("HTTP 402: STABLECOIN PAYMENT REQUIRED");
         h402Label.setFont(Theme.TITLE_H3);
         h402Label.setForeground(Theme.ACCENT_CYAN);
 
-        JLabel descLabel = new JLabel("Pay instantly using x402 Web3 Micro-Payment Protocol");
+        JLabel descLabel = new JLabel("Instant P2P USD Stablecoin Settlement via x402 Protocol");
         descLabel.setFont(Theme.SMALL);
         descLabel.setForeground(Theme.TEXT_MUTED);
 
@@ -110,20 +110,20 @@ public class CryptoCheckoutDialog extends JDialog {
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
         body.setOpaque(false);
 
-        // Token Selection Row
-        JLabel tokenSelectLabel = new JLabel("Select Crypto Token:");
+        // Stablecoin Token Selection Row
+        JLabel tokenSelectLabel = new JLabel("Select USD Stablecoin:");
         tokenSelectLabel.setFont(Theme.BODY);
         tokenSelectLabel.setForeground(Theme.TEXT_MUTED);
         tokenSelectLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel tokensRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        JPanel tokensRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
         tokensRow.setOpaque(false);
 
-        String[] tokens = {"SOL", "ETH", "USDT", "BTC"};
+        String[] stablecoins = {"USDT", "USDC", "USDG"};
         ButtonGroup bg = new ButtonGroup();
 
-        for (String t : tokens) {
-            JRadioButton rb = new JRadioButton(t, "SOL".equals(t));
+        for (String t : stablecoins) {
+            JRadioButton rb = new JRadioButton(t, "USDT".equals(t));
             rb.setOpaque(false);
             rb.setFont(Theme.TITLE_H3);
             rb.setForeground(Theme.TEXT_PRIMARY);
@@ -162,14 +162,14 @@ public class CryptoCheckoutDialog extends JDialog {
         body.add(Box.createVerticalStrut(14));
 
         // Copyable Wallet Address Row
-        JLabel walletLabel = new JLabel("Merchant Wallet Address:");
+        JLabel walletLabel = new JLabel("Merchant Stablecoin Vault Address:");
         walletLabel.setFont(Theme.BODY);
         walletLabel.setForeground(Theme.TEXT_MUTED);
 
         JPanel walletRow = new JPanel(new BorderLayout(8, 0));
         walletRow.setOpaque(false);
 
-        JTextField walletAddressField = new JTextField("0x71C849B3E2F40A1079543NEXA402SOL");
+        JTextField walletAddressField = new JTextField("0x71C849B3E2F40A1079543NEXASTABLECOIN402");
         walletAddressField.setEditable(false);
         walletAddressField.setBackground(Theme.BG_ELEVATED);
         walletAddressField.setForeground(Theme.ACCENT_LIGHT);
@@ -182,7 +182,7 @@ public class CryptoCheckoutDialog extends JDialog {
         ModernButton copyBtn = new ModernButton("Copy", ModernButton.Style.OUTLINE, 8);
         copyBtn.addActionListener(e -> {
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(walletAddressField.getText()), null);
-            ToastManager.showToast((JFrame) getOwner(), "Wallet address copied to clipboard!");
+            ToastManager.showToast((JFrame) getOwner(), "Stablecoin vault address copied!");
         });
 
         walletRow.add(walletAddressField, BorderLayout.CENTER);
@@ -194,7 +194,7 @@ public class CryptoCheckoutDialog extends JDialog {
         body.add(Box.createVerticalStrut(14));
 
         // Tx Hash Verification Input
-        JLabel txLabel = new JLabel("Transaction Hash / Signature:");
+        JLabel txLabel = new JLabel("Transaction Hash / On-Chain Signature:");
         txLabel.setFont(Theme.BODY);
         txLabel.setForeground(Theme.TEXT_MUTED);
 
@@ -215,7 +215,7 @@ public class CryptoCheckoutDialog extends JDialog {
         panel.add(body, BorderLayout.CENTER);
 
         // Verification Button
-        verifyCryptoBtn = new ModernButton("⚡ Verify x402 Payment", ModernButton.Style.PRIMARY, 12);
+        verifyCryptoBtn = new ModernButton("⚡ Verify " + selectedToken + " Payment", ModernButton.Style.PRIMARY, 12);
         verifyCryptoBtn.addActionListener(e -> verifyCryptoPayment());
         panel.add(verifyCryptoBtn, BorderLayout.SOUTH);
 
@@ -292,22 +292,19 @@ public class CryptoCheckoutDialog extends JDialog {
     }
 
     private void updateCryptoAmount() {
-        double cryptoValue = totalPrice;
-        switch (selectedToken) {
-            case "SOL": cryptoValue = totalPrice / 140.0; break;
-            case "ETH": cryptoValue = totalPrice / 3200.0; break;
-            case "BTC": cryptoValue = totalPrice / 65000.0; break;
-            case "USDT": cryptoValue = totalPrice; break;
+        // 1:1 Pegged USD Stablecoins (USDT, USDC, USDG)
+        cryptoAmountLabel.setText(String.format("%.2f %s", totalPrice, selectedToken));
+        if (verifyCryptoBtn != null) {
+            verifyCryptoBtn.setText("⚡ Verify " + selectedToken + " Payment");
         }
-        cryptoAmountLabel.setText(String.format("%.4f %s", cryptoValue, selectedToken));
     }
 
     private void verifyCryptoPayment() {
         verifyCryptoBtn.setEnabled(false);
-        verifyCryptoBtn.setText("⏳ Verifying x402 Protocol Block...");
+        verifyCryptoBtn.setText("⏳ Verifying " + selectedToken + " On-Chain Block...");
 
         Timer timer = new Timer(1800, e -> {
-            ToastManager.showToast((JFrame) getOwner(), "⚡ x402 Crypto Payment Verified!");
+            ToastManager.showToast((JFrame) getOwner(), "⚡ " + selectedToken + " Payment Verified!");
             completePurchase();
         });
         timer.setRepeats(false);
