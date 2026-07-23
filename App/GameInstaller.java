@@ -5,9 +5,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * Real Game Download, Installation & Launch Engine for Ankhvault
- * Downloads game build packages over HTTP/HTTPS, extracts them to LocalAppData/Ankhvault/Games/<GameId>/,
- * and launches native executables safely via ProcessBuilder.
+ * Cross-Platform Game Download, Installation & Launch Engine for Ankhvault
+ * Supports Windows 11, Linux (Ubuntu/Debian/Arch/Fedora), and macOS.
  */
 public class GameInstaller {
     public interface DownloadProgressCallback {
@@ -16,12 +15,31 @@ public class GameInstaller {
         void onError(String errorMessage);
     }
 
+    public static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("win");
+    }
+
+    public static boolean isLinux() {
+        String os = System.getProperty("os.name").toLowerCase();
+        return os.contains("nux") || os.contains("nix");
+    }
+
     public static File getInstallDirectory(String gameId) {
-        String localAppData = System.getenv("LOCALAPPDATA");
-        if (localAppData == null || localAppData.isEmpty()) {
-            localAppData = System.getProperty("user.home");
+        String base;
+        if (isWindows()) {
+            base = System.getenv("LOCALAPPDATA");
+            if (base == null || base.isEmpty()) {
+                base = System.getProperty("user.home");
+            }
+        } else {
+            String xdgData = System.getenv("XDG_DATA_HOME");
+            if (xdgData != null && !xdgData.isEmpty()) {
+                base = xdgData;
+            } else {
+                base = System.getProperty("user.home") + "/.local/share";
+            }
         }
-        File baseDir = new File(localAppData, "Ankhvault/Games/" + gameId.toLowerCase().replaceAll("[^a-z0-9]", "_"));
+        File baseDir = new File(base, "Ankhvault/Games/" + gameId.toLowerCase().replaceAll("[^a-z0-9]", "_"));
         if (!baseDir.exists()) baseDir.mkdirs();
         return baseDir;
     }
@@ -32,7 +50,7 @@ public class GameInstaller {
         if (files == null) return null;
 
         for (File f : files) {
-            if (f.isFile() && (f.getName().toLowerCase().endsWith(".exe") || f.getName().toLowerCase().endsWith(".bat"))) {
+            if (f.isFile() && isExecutableFile(f)) {
                 return f;
             }
         }
@@ -45,6 +63,16 @@ public class GameInstaller {
         return null;
     }
 
+    public static boolean isExecutableFile(File f) {
+        String name = f.getName().toLowerCase();
+        if (isWindows()) {
+            return name.endsWith(".exe") || name.endsWith(".bat") || name.endsWith(".cmd");
+        } else {
+            return name.endsWith(".sh") || name.endsWith(".appimage") || name.endsWith(".bin") ||
+                   name.endsWith(".x86_64") || name.endsWith(".x86") || f.canExecute() || !name.contains(".");
+        }
+    }
+
     public static boolean isGameInstalled(String gameId) {
         File dir = getInstallDirectory(gameId);
         File exe = findExecutable(dir);
@@ -54,7 +82,17 @@ public class GameInstaller {
     public static boolean launchExecutable(File executable) {
         if (executable == null || !executable.exists()) return false;
         try {
-            ProcessBuilder pb = new ProcessBuilder(executable.getAbsolutePath());
+            if (!isWindows()) {
+                executable.setExecutable(true, false);
+            }
+
+            ProcessBuilder pb;
+            if (isLinux() && executable.getName().endsWith(".sh")) {
+                pb = new ProcessBuilder("bash", executable.getAbsolutePath());
+            } else {
+                pb = new ProcessBuilder(executable.getAbsolutePath());
+            }
+
             pb.directory(executable.getParentFile());
             pb.start();
             return true;
@@ -72,7 +110,7 @@ public class GameInstaller {
 
                 URL url = new URL(downloadUrlStr);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestProperty("User-Agent", "Ankhvault-Launcher/3.0");
+                conn.setRequestProperty("User-Agent", "Ankhvault-Launcher/3.0 (" + System.getProperty("os.name") + ")");
                 
                 int fileLength = conn.getContentLength();
                 InputStream input = conn.getInputStream();
@@ -129,7 +167,12 @@ public class GameInstaller {
                             fos.write(buffer, 0, len);
                         }
                     }
-                    if (file.getName().toLowerCase().endsWith(".exe") || file.getName().toLowerCase().endsWith(".bat")) {
+
+                    if (!isWindows()) {
+                        file.setExecutable(true, false);
+                    }
+
+                    if (isExecutableFile(file)) {
                         if (mainExe == null) mainExe = file;
                     }
                 }
