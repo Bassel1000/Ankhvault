@@ -1,15 +1,21 @@
 # 🎮 NexaPlay 3.0 — Modern Desktop Gaming Launcher & Store
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://adoptium.net/)
-[![Swing UI](https://img.shields.io/badge/UI-Pure%20Java%20Swing-blue.svg)]()
+[![UI](https://img.shields.io/badge/UI-Pure%20Java%20Swing-blue.svg)]()
+[![Security](https://img.shields.io/badge/Security-AES--256%20%2B%20SHA--256-green.svg)]()
 [![Web3](https://img.shields.io/badge/Payments-Crypto%20x402-purple.svg)]()
 [![License](https://img.shields.io/badge/License-MIT-green.svg)]()
 
-**NexaPlay** is a state-of-the-art desktop gaming launcher, store, and game platform built in **Pure Java Swing**. Inspired by modern gaming client platforms such as Steam, Epic Games Store, and GOG Galaxy, NexaPlay features custom antialiased graphics rendering, dark glassmorphism aesthetics, a Store Cart and **Crypto x402 Web3 Payment Gateway**, a persistent user database, and 5 overhauled built-in mini-games.
+**NexaPlay** is a state-of-the-art desktop gaming launcher, store, and game platform built in **Pure Java Swing**. Inspired by modern gaming client platforms such as Steam, Epic Games Store, and GOG Galaxy, NexaPlay features custom antialiased graphics rendering, dark glassmorphism aesthetics, a Store Cart and **Crypto x402 Web3 Payment Gateway**, an **AES-256 Encrypted Persistent Database Engine**, and 5 overhauled built-in mini-games.
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Features & Enterprise Security
+
+- 🔒 **Enterprise-Grade Database Security (`DatabaseManager.java`)**:
+  - **SHA-256 Cryptographic Salted Password Hashing**: Passwords are never stored in plain text. Each user receives a unique 128-bit cryptographic salt and SHA-256 hash.
+  - **AES-256 CBC Binary Database Encryption**: Database contents (`nexa_database.db`) are fully encrypted using 128-bit/256-bit AES encryption with random Initialization Vectors (IV). Opening the database file in text editors reveals unreadable encrypted binary payload.
+  - **Automated Plaintext Cleanup**: Insecure legacy `.txt` database files are automatically deleted.
 
 - 🎨 **Pure Java Custom Design Engine**:
   - **Antialiased Graphics**: Global 2D rendering hints for smooth curves, text, and vector graphics.
@@ -20,9 +26,6 @@
   - **Game Catalog Pricing**: Free games (`$0.00`) and paid titles (`$4.99`, `$9.99`, `$14.99`).
   - **Store Cart**: Cart tab (`🛒 Cart (X)`) with live item counter badge, subtotal calculations, and item management.
   - **Crypto x402 Web3 Gateway**: Interactive checkout modal implementing the **HTTP 402 Payment Required** protocol. Supports **SOL (Solana)**, **ETH (Ethereum)**, **USDT (Tether)**, and **BTC (Bitcoin)** with real-time crypto price conversion, wallet copy, and transaction verification.
-
-- 🗄️ **Persistent Database Engine**:
-  - File-backed persistent storage (`nexa_database.txt`) managing registered accounts, password verification, user cart items, and owned game libraries across sessions.
 
 - 🕹️ **5 Overhauled Built-In Games**:
   1. **Tic Tac Toe**: Interactive 3x3 grid with turn indicators, custom symbols ('X' / 'O'), and restart logic.
@@ -47,15 +50,19 @@ classDiagram
         -static DatabaseManager instance
         -File dbFile
         -Map~String, UserData~ users
+        -byte[] AES_KEY_BYTES
         +getInstance() DatabaseManager
         +registerUser(username, email, password) bool
         +authenticateUser(username, password) bool
+        +hashPassword(password, salt) String
         +getUserLibrary(username) Set~String~
         +addToUserLibrary(username, gameTitle)
         +getUserCart(username) Set~String~
         +addToUserCart(username, gameTitle)
         +removeFromUserCart(username, gameTitle)
         +clearUserCart(username)
+        -loadDatabase()
+        -saveDatabase()
     }
 
     class Theme {
@@ -153,7 +160,7 @@ classDiagram
 
 ---
 
-### 2. User Authentication & Crypto x402 Checkout Flow
+### 2. Secure User Authentication & AES-256 Crypto x402 Flow
 
 ```mermaid
 sequenceDiagram
@@ -161,28 +168,25 @@ sequenceDiagram
     actor User
     participant Main
     participant Auth as Login / Register
-    participant DB as DatabaseManager
+    participant DB as DatabaseManager (AES-256 + SHA-256)
     participant App as NexaPlay Launcher
     participant Cart as CartPanel
     participant x402 as CryptoCheckoutDialog
 
     User->>Main: Launch Application
-    Main->>DB: Initialize Database
+    Main->>DB: Load & Decrypt AES-256 DB (nexa_database.db)
     Main->>Auth: Open Login Window
-    User->>Auth: Enter Credentials (or Register)
-    Auth->>DB: Validate Account
+    User->>Auth: Enter Credentials
+    Auth->>DB: Validate SHA-256 Salted Password Hash
     DB-->>Auth: Success (Authenticated)
     Auth->>App: Launch NexaPlay (User Session)
-    User->>App: Browse Store & Click "+ Cart"
-    App->>DB: Add Game to Cart
-    User->>App: Open "🛒 Cart" Tab
-    App->>Cart: Load Cart Items & Calculate Total
+    User->>App: Add Games to Cart & Open "🛒 Cart"
     User->>Cart: Click "Proceed to Checkout"
-    Cart->>x402: Open Crypto x402 Modal
+    Cart->>x402: Open Crypto x402 Web3 Gateway
     User->>x402: Select Token (SOL/ETH/USDT/BTC) & Click "Verify x402 Payment"
-    x402->>x402: Verify HTTP 402 Web3 Hash
-    x402->>DB: Add Purchased Games to User Library & Clear Cart
-    DB-->>x402: Saved to nexa_database.txt
+    x402->>x402: Verify HTTP 402 Payment Required Block
+    x402->>DB: Add Games to Library & Encrypt File (AES-256)
+    DB-->>x402: Encrypted Payload Written
     x402-->>App: Toast Success & Games Unlocked in Library
 ```
 
@@ -207,7 +211,7 @@ NexaPlay Project 2.0/
 │   ├── GameItem.java        # Store Catalog Game Item Data Model
 │   ├── CartPanel.java       # E-Commerce Cart View & Order Summary
 │   ├── CryptoCheckoutDialog.java # Web3 HTTP 402 Payment Required Dialog
-│   ├── DatabaseManager.java # Local File Database Persistence Engine
+│   ├── DatabaseManager.java # AES-256 Encrypted & SHA-256 Hashed Database
 │   ├── ToastManager.java    # Floating Non-Blocking Toast Overlays
 │   ├── ResponsiveWrapGrid.java # Auto-Calculated Responsive Grid Layout
 │   ├── TicTacToeGame.java   # Overhauled Tic Tac Toe Game
