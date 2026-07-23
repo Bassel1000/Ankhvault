@@ -10,11 +10,11 @@ import java.security.SecureRandom;
 import java.util.*;
 
 /**
- * Enterprise Secure Database Engine for NexaPlay
+ * Enterprise Secure Database Engine for NexaPlay (Java 26)
  * Features:
  *  1. SHA-256 Cryptographic Salted Password Hashing (No Plaintext Passwords)
  *  2. AES-256 CBC Binary File Encryption (nexa_database.db)
- *  3. Automated legacy plaintext file cleanup (.txt)
+ *  3. Generic Default Credentials (admin / admin123, demo / demo, guest / guest123)
  */
 public class DatabaseManager {
     private static DatabaseManager instance;
@@ -46,22 +46,19 @@ public class DatabaseManager {
     private DatabaseManager() {
         File dir = new File("App");
         if (!dir.exists()) dir = new File(".");
-        
-        // Remove legacy insecure plaintext .txt file if exists
-        File legacyTxt = new File(dir, "nexa_database.txt");
-        if (legacyTxt.exists()) {
-            legacyTxt.delete();
-        }
 
         dbFile = new File(dir, "nexa_database.db");
         loadDatabase();
 
-        // Seed default secure users if empty
+        // Seed generic default accounts if database is new
+        if (!users.containsKey("admin")) {
+            registerUser("admin", "admin@nexaplay.io", "admin123");
+        }
         if (!users.containsKey("demo")) {
             registerUser("demo", "demo@nexaplay.io", "demo");
         }
-        if (!users.containsKey("bassel")) {
-            registerUser("bassel", "bassel@nexaplay.io", "12345678");
+        if (!users.containsKey("guest")) {
+            registerUser("guest", "guest@nexaplay.io", "guest123");
         }
     }
 
