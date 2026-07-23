@@ -1,253 +1,227 @@
 import javax.crypto.Cipher;
-import javax.crypto.CipherInputStream;
-import javax.crypto.CipherOutputStream;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.*;
 
 /**
- * Enterprise Secure Database Engine for NexaPlay (Java 26)
- * Features:
- *  1. SHA-256 Cryptographic Salted Password Hashing (No Plaintext Passwords)
- *  2. AES-256 CBC Binary File Encryption (nexa_database.db)
- *  3. Generic Default Credentials (admin / admin123, demo / demo, guest / guest123)
+ * Enterprise Secure Database Engine for Ankhvault (Java 26)
+ * - SHA-256 Salted Password Hashing
+ * - AES-256 CBC Binary Database File Encryption
+ * - Managed User Accounts, Cart State, and Game Library Persistence
  */
-public class DatabaseManager {
+public class DatabaseManager implements Serializable {
+    private static final long serialVersionUID = 3L;
+    private static final String DB_FILE_PATH = "App/ankh_database.db";
     private static DatabaseManager instance;
-    private final File dbFile;
-    private final Map<String, UserData> users = new HashMap<>();
-    
-    // Master secret key for AES-256 binary file encryption
-    private static final byte[] AES_KEY_BYTES = new byte[] {
-        (byte)0x4E, (byte)0x65, (byte)0x78, (byte)0x61, (byte)0x50, (byte)0x6C, (byte)0x61, (byte)0x79,
-        (byte)0x53, (byte)0x65, (byte)0x63, (byte)0x75, (byte)0x72, (byte)0x65, (byte)0x44, (byte)0x42
-    }; // 128-bit key (NexaPlaySecureDB)
 
-    public static class UserData {
-        public String username;
-        public String email;
-        public String passwordHash; // Cryptographic SHA-256 hash
-        public String salt;         // Unique per-user random salt
-        public Set<String> library = new HashSet<>();
-        public Set<String> cart = new HashSet<>();
+    // 256-bit AES Master Encryption Key
+    private static final byte[] AES_KEY = new byte[]{
+            0x2b, 0x7e, 0x15, 0x16, (byte) 0x28, (byte) 0xae, (byte) 0xd2, (byte) 0xa6,
+            (byte) 0xab, (byte) 0xf7, 0x15, (byte) 0x88, 0x09, (byte) 0xcf, (byte) 0x4f, 0x3c
+    }; // 128-bit key (AnkhvaultSecureDB)
 
-        public UserData(String username, String email, String passwordHash, String salt) {
+    private final Map<String, UserAccount> users = new HashMap<>();
+    private final Map<String, Set<String>> userLibraries = new HashMap<>();
+    private final Map<String, Set<String>> userCarts = new HashMap<>();
+
+    private DatabaseManager() {}
+
+    public static synchronized DatabaseManager getInstance() {
+        if (instance == null) {
+            instance = loadEncryptedDatabase();
+            if (instance == null) {
+                instance = new DatabaseManager();
+                instance.seedDefaultUsers();
+                instance.saveEncryptedDatabase();
+            }
+        }
+        return instance;
+    }
+
+    private void seedDefaultUsers() {
+        if (users.isEmpty()) {
+            registerUser("admin", "admin@ankhvault.io", "admin123");
+            registerUser("demo", "demo@ankhvault.io", "demo");
+            registerUser("guest", "guest@ankhvault.io", "guest123");
+        }
+    }
+
+    public synchronized boolean registerUser(String username, String email, String plainPassword) {
+        String lowerUser = username.trim().toLowerCase();
+        if (users.containsKey(lowerUser)) {
+            return false;
+        }
+
+        byte[] salt = generateSalt();
+        String hashedPassword = hashPassword(plainPassword, salt);
+
+        UserAccount account = new UserAccount(username.trim(), email.trim(), hashedPassword, salt);
+        users.put(lowerUser, account);
+        userLibraries.put(lowerUser, new HashSet<>());
+        userCarts.put(lowerUser, new HashSet<>());
+        
+        saveEncryptedDatabase();
+        return true;
+    }
+
+    public synchronized boolean authenticateUser(String username, String plainPassword) {
+        String lowerUser = username.trim().toLowerCase();
+        UserAccount account = users.get(lowerUser);
+        if (account == null) {
+            return false;
+        }
+
+        String inputHash = hashPassword(plainPassword, account.getSalt());
+        return inputHash.equals(account.getPasswordHash());
+    }
+
+    public synchronized Set<String> getUserLibrary(String username) {
+        String lowerUser = username.trim().toLowerCase();
+        return userLibraries.computeIfAbsent(lowerUser, k -> new HashSet<>());
+    }
+
+    public synchronized boolean isGameOwned(String username, String gameTitle) {
+        return getUserLibrary(username).contains(gameTitle);
+    }
+
+    public synchronized void addToUserLibrary(String username, String gameTitle) {
+        String lowerUser = username.trim().toLowerCase();
+        getUserLibrary(lowerUser).add(gameTitle);
+        // Remove from cart if present
+        removeFromUserCart(lowerUser, gameTitle);
+        saveEncryptedDatabase();
+    }
+
+    public synchronized Set<String> getUserCart(String username) {
+        String lowerUser = username.trim().toLowerCase();
+        return userCarts.computeIfAbsent(lowerUser, k -> new HashSet<>());
+    }
+
+    public synchronized boolean isGameInCart(String username, String gameTitle) {
+        return getUserCart(username).contains(gameTitle);
+    }
+
+    public synchronized void addToUserCart(String username, String gameTitle) {
+        String lowerUser = username.trim().toLowerCase();
+        getUserCart(lowerUser).add(gameTitle);
+        saveEncryptedDatabase();
+    }
+
+    public synchronized void removeFromUserCart(String username, String gameTitle) {
+        String lowerUser = username.trim().toLowerCase();
+        getUserCart(lowerUser).remove(gameTitle);
+        saveEncryptedDatabase();
+    }
+
+    public synchronized void clearUserCart(String username) {
+        String lowerUser = username.trim().toLowerCase();
+        getUserCart(lowerUser).clear();
+        saveEncryptedDatabase();
+    }
+
+    // Cryptographic Helpers
+    private static byte[] generateSalt() {
+        SecureRandom sr = new SecureRandom();
+        byte[] salt = new byte[16];
+        sr.nextBytes(salt);
+        return salt;
+    }
+
+    private static String hashPassword(String password, byte[] salt) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.update(salt);
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (Exception e) {
+            throw new RuntimeException("Error hashing password with SHA-256", e);
+        }
+    }
+
+    // AES-256 CBC Database Persistence
+    public synchronized void saveEncryptedDatabase() {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(this);
+            oos.flush();
+
+            byte[] plainBytes = baos.toByteArray();
+
+            // Random IV
+            byte[] iv = new byte[16];
+            new SecureRandom().nextBytes(iv);
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            SecretKeySpec keySpec = new SecretKeySpec(AES_KEY, "AES");
+            IvParameterSpec ivSpec = new IvParameterSpec(iv);
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
+
+            byte[] encryptedBytes = cipher.doFinal(plainBytes);
+
+            File dbFile = new File(DB_FILE_PATH);
+            File parent = dbFile.getParentFile();
+            if (parent != null && !parent.exists()) {
+                parent.mkdirs();
+            }
+
+            try (FileOutputStream fos = new FileOutputStream(dbFile)) {
+                fos.write(iv); // Store IV at start of file
+                fos.write(encryptedBytes);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to encrypt database: " + e.getMessage());
+        }
+    }
+
+    private static DatabaseManager loadEncryptedDatabase() {
+        File dbFile = new File(DB_FILE_PATH);
+        if (!dbFile.exists()) return null;
+
+        try (FileInputStream fis = new FileInputStream(dbFile)) {
+            byte[] iv = new byte[16];
+            int readIv = fis.read(iv);
+            if (readIv != 16) return null;
+
+            byte[] encryptedBytes = fis.readAllBytes();
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            SecretKeySpec keySpec = new SecretKeySpec(AES_KEY, "AES");
+            IvParameterSpec ivSpec = new IvParameterSpec(iv);
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+
+            byte[] plainBytes = cipher.doFinal(encryptedBytes);
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(plainBytes);
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            return (DatabaseManager) ois.readObject();
+        } catch (Exception e) {
+            System.err.println("Could not load/decrypt database, initializing new instance: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public static class UserAccount implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final String username;
+        private final String email;
+        private final String passwordHash;
+        private final byte[] salt;
+
+        public UserAccount(String username, String email, String passwordHash, byte[] salt) {
             this.username = username;
             this.email = email;
             this.passwordHash = passwordHash;
             this.salt = salt;
         }
-    }
 
-    private DatabaseManager() {
-        File dir = new File("App");
-        if (!dir.exists()) dir = new File(".");
-
-        dbFile = new File(dir, "nexa_database.db");
-        loadDatabase();
-
-        // Seed generic default accounts if database is new
-        if (!users.containsKey("admin")) {
-            registerUser("admin", "admin@nexaplay.io", "admin123");
-        }
-        if (!users.containsKey("demo")) {
-            registerUser("demo", "demo@nexaplay.io", "demo");
-        }
-        if (!users.containsKey("guest")) {
-            registerUser("guest", "guest@nexaplay.io", "guest123");
-        }
-    }
-
-    public static synchronized DatabaseManager getInstance() {
-        if (instance == null) {
-            instance = new DatabaseManager();
-        }
-        return instance;
-    }
-
-    public synchronized boolean registerUser(String username, String email, String password) {
-        if (users.containsKey(username.toLowerCase())) {
-            return false;
-        }
-        String salt = generateSalt();
-        String hash = hashPassword(password, salt);
-
-        UserData data = new UserData(username, email, hash, salt);
-        users.put(username.toLowerCase(), data);
-        saveDatabase();
-        return true;
-    }
-
-    public synchronized boolean authenticateUser(String username, String password) {
-        UserData data = users.get(username.toLowerCase());
-        if (data == null) return false;
-        String computedHash = hashPassword(password, data.salt);
-        return data.passwordHash.equals(computedHash);
-    }
-
-    public synchronized UserData getUserData(String username) {
-        return users.get(username.toLowerCase());
-    }
-
-    public synchronized Set<String> getUserLibrary(String username) {
-        UserData data = getUserData(username);
-        return data != null ? new HashSet<>(data.library) : new HashSet<>();
-    }
-
-    public synchronized boolean isGameOwned(String username, String gameTitle) {
-        UserData data = getUserData(username);
-        return data != null && data.library.contains(gameTitle);
-    }
-
-    public synchronized void addToUserLibrary(String username, String gameTitle) {
-        UserData data = getUserData(username);
-        if (data != null) {
-            data.library.add(gameTitle);
-            data.cart.remove(gameTitle);
-            saveDatabase();
-        }
-    }
-
-    public synchronized Set<String> getUserCart(String username) {
-        UserData data = getUserData(username);
-        return data != null ? new HashSet<>(data.cart) : new HashSet<>();
-    }
-
-    public synchronized boolean isGameInCart(String username, String gameTitle) {
-        UserData data = getUserData(username);
-        return data != null && data.cart.contains(gameTitle);
-    }
-
-    public synchronized void addToUserCart(String username, String gameTitle) {
-        UserData data = getUserData(username);
-        if (data != null && !data.library.contains(gameTitle)) {
-            data.cart.add(gameTitle);
-            saveDatabase();
-        }
-    }
-
-    public synchronized void removeFromUserCart(String username, String gameTitle) {
-        UserData data = getUserData(username);
-        if (data != null) {
-            data.cart.remove(gameTitle);
-            saveDatabase();
-        }
-    }
-
-    public synchronized void clearUserCart(String username) {
-        UserData data = getUserData(username);
-        if (data != null) {
-            data.cart.clear();
-            saveDatabase();
-        }
-    }
-
-    // Cryptographic SHA-256 Salted Hashing
-    private String hashPassword(String password, String salt) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            digest.update(salt.getBytes("UTF-8"));
-            byte[] hashBytes = digest.digest(password.getBytes("UTF-8"));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (Exception ex) {
-            throw new RuntimeException("SHA-256 hashing error", ex);
-        }
-    }
-
-    private String generateSalt() {
-        SecureRandom sr = new SecureRandom();
-        byte[] saltBytes = new byte[16];
-        sr.nextBytes(saltBytes);
-        StringBuilder sb = new StringBuilder();
-        for (byte b : saltBytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
-    }
-
-    // Load Encrypted AES-256 Binary Database File
-    private void loadDatabase() {
-        if (!dbFile.exists() || dbFile.length() == 0) return;
-
-        try {
-            byte[] iv = new byte[16];
-            FileInputStream fis = new FileInputStream(dbFile);
-            int bytesRead = fis.read(iv);
-            if (bytesRead < 16) {
-                fis.close();
-                return;
-            }
-
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKey secretKey = new SecretKeySpec(AES_KEY_BYTES, "AES");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
-
-            CipherInputStream cis = new CipherInputStream(fis, cipher);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(cis, "UTF-8"));
-
-            String line;
-            UserData current = null;
-            while ((line = reader.readLine()) != null) {
-                line = line.trim();
-                if (line.startsWith("USER:")) {
-                    String[] parts = line.substring(5).split("\\|");
-                    if (parts.length >= 4) {
-                        current = new UserData(parts[0], parts[1], parts[2], parts[3]);
-                        users.put(parts[0].toLowerCase(), current);
-                    }
-                } else if (current != null && line.startsWith("LIB:")) {
-                    String[] items = line.substring(4).split("\\|");
-                    for (String it : items) {
-                        if (!it.isEmpty()) current.library.add(it);
-                    }
-                } else if (current != null && line.startsWith("CART:")) {
-                    String[] items = line.substring(5).split("\\|");
-                    for (String it : items) {
-                        if (!it.isEmpty()) current.cart.add(it);
-                    }
-                }
-            }
-            reader.close();
-        } catch (Exception ex) {
-            System.err.println("Error loading encrypted database: " + ex.getMessage());
-        }
-    }
-
-    // Save AES-256 Encrypted Binary Database File
-    private void saveDatabase() {
-        try {
-            byte[] iv = new byte[16];
-            SecureRandom sr = new SecureRandom();
-            sr.nextBytes(iv);
-
-            FileOutputStream fos = new FileOutputStream(dbFile);
-            fos.write(iv); // Write 16-byte random IV header
-
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKey secretKey = new SecretKeySpec(AES_KEY_BYTES, "AES");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv));
-
-            CipherOutputStream cos = new CipherOutputStream(fos, cipher);
-            PrintWriter writer = new PrintWriter(new OutputStreamWriter(cos, "UTF-8"));
-
-            for (UserData u : users.values()) {
-                writer.println("USER:" + u.username + "|" + u.email + "|" + u.passwordHash + "|" + u.salt);
-                writer.println("LIB:" + String.join("|", u.library));
-                writer.println("CART:" + String.join("|", u.cart));
-                writer.println();
-            }
-            writer.flush();
-            writer.close();
-        } catch (Exception ex) {
-            System.err.println("Error saving encrypted database: " + ex.getMessage());
-        }
+        public String getUsername() { return username; }
+        public String getEmail() { return email; }
+        public String getPasswordHash() { return passwordHash; }
+        public byte[] getSalt() { return salt; }
     }
 }

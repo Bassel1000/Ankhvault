@@ -14,7 +14,7 @@ public class x402Web3Client {
     private static final String SOLANA_RPC_URL = "https://api.mainnet-beta.solana.com";
     private static final String BASE_RPC_URL = "https://mainnet.base.org";
     
-    // Official NexaPlay Platform Real Treasury Vaults
+    // Official Ankhvault Platform Real Treasury Vaults
     public static final String TREASURY_WALLET_SOL = "68MPta3vW2cNi2JYBtYPVLk8RFUHE5mAuAKppkik9mtb";
     public static final String TREASURY_WALLET_EVM = "0x58f9f0e213140b8f59382a8b195bcbe2e8e8d07a";
 

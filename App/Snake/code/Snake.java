@@ -13,7 +13,7 @@ public class Snake extends JFrame {
         add(new Board());
         setResizable(false);
         pack();
-        setTitle("NexaPlay - Snake");
+        setTitle("Ankhvault - Snake");
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }

@@ -1,7 +1,7 @@
 {
-  "name": "nexaplay-platform-api",
+  "name": "ankhvault-platform-api",
   "version": "3.0.0",
-  "description": "NexaPlay Cloud Store REST API & Developer Portal for OpenShip",
+  "description": "Ankhvault Cloud Store REST API & Developer Portal by Duat Studio",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

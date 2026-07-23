@@ -7,20 +7,20 @@ import java.io.File;
 public final class Theme {
     private Theme() {}
 
-    // Palette Tokens
-    public static final Color BG_ROOT = new Color(0x0B, 0x0E, 0x14);       // Deep Dark Background
+    // Ankhvault & Duat Studio Palette Tokens
+    public static final Color BG_ROOT = new Color(0x0B, 0x0E, 0x14);       // Charcoal Navy Background
     public static final Color BG_ELEVATED = new Color(0x16, 0x1B, 0x26);   // Card & Component Background
     public static final Color BG_HOVER = new Color(0x1F, 0x27, 0x38);      // Elevated Hover Surface
     public static final Color BG_CARD = new Color(0x13, 0x19, 0x24);       // Game Card Surface
     
-    public static final Color ACCENT = new Color(0x63, 0x66, 0xF1);        // Primary Electric Indigo
-    public static final Color ACCENT_LIGHT = new Color(0x81, 0x8C, 0xF8);  // Light Accent Glow
-    public static final Color ACCENT_CYAN = new Color(0x06, 0xB6, 0xD4);   // Secondary Neon Cyan
-    public static final Color SUCCESS = new Color(0x10, 0xB9, 0x81);       // Success Emerald Green
+    public static final Color ACCENT = new Color(0xD4, 0xAF, 0x37);        // Primary Electric Gold (#D4AF37)
+    public static final Color ACCENT_LIGHT = new Color(0xE5, 0xC3, 0x58);  // Light Gold Glow (#E5C358)
+    public static final Color ACCENT_CYAN = new Color(0x17, 0x91, 0x9E);   // Scarab Turquoise (#17919E)
+    public static final Color SUCCESS = new Color(0x10, 0xB9, 0x81);       // Emerald Green Accent (#10B981)
     public static final Color DANGER = new Color(0xEF, 0x44, 0x44);        // Danger Red
-    public static final Color WARNING = new Color(0xF5, 0x9E, 0x0B);       // Warning Orange
+    public static final Color WARNING = new Color(0xF5, 0x9E, 0x0B);       // Warning Gold/Orange
     
-    public static final Color TEXT_PRIMARY = new Color(0xFF, 0xFF, 0xFF);   // Pure White Primary Text
+    public static final Color TEXT_PRIMARY = new Color(0xED, 0xE6, 0xD6);   // Sandstone Text (#EDE6D6)
     public static final Color TEXT_MUTED = new Color(0x94, 0xA3, 0xB8);     // Muted Slate Text
     public static final Color BORDER_STROKE = new Color(0x2A, 0x34, 0x47);  // Dark Slate Stroke
 
@@ -60,14 +60,16 @@ public final class Theme {
         if (f1.exists()) return f1;
         File f2 = new File("App", path);
         if (f2.exists()) return f2;
-        File f3 = new File("App/Snake/resources", path);
+        File f3 = new File("assets", path);
         if (f3.exists()) return f3;
-        File f4 = new File("Snake/resources", path);
+        File f4 = new File("../assets", path);
         if (f4.exists()) return f4;
+        File f5 = new File("App/Snake/resources", path);
+        if (f5.exists()) return f5;
         return null;
     }
 
-    // Creates a 100% Transparent Vector Brand Logo Icon (No Square Bounding Boxes)
+    // Creates a 100% Transparent Vector Ankh Emblem Icon (Electric Gold & Scarab Turquoise)
     public static ImageIcon createTransparentLogoIcon(int width, int height) {
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = image.createGraphics();
@@ -76,40 +78,26 @@ public final class Theme {
         int cx = width / 2;
         int cy = height / 2;
 
-        // Draw Glowing Controller Body (Cyan & Indigo Gradient)
-        GradientPaint gp = new GradientPaint(0, 0, ACCENT_CYAN, width, height, ACCENT_LIGHT);
+        // Gold & Turquoise Gradient Paint
+        GradientPaint gp = new GradientPaint(0, 0, ACCENT, width, height, ACCENT_CYAN);
         g2.setPaint(gp);
-        g2.setStroke(new BasicStroke(2.6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.setStroke(new BasicStroke(2.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
-        // Controller Outline Path
-        Path2D p = new Path2D.Float();
-        p.moveTo(cx - 15, cy - 9);
-        p.curveTo(cx - 9, cy - 15, cx + 9, cy - 15, cx + 15, cy - 9);
-        p.curveTo(cx + 19, cy - 4, cx + 19, cy + 11, cx + 13, cy + 13);
-        p.curveTo(cx + 9, cy + 15, cx + 4, cy + 5, cx, cy + 5);
-        p.curveTo(cx - 4, cy + 5, cx - 8, cy + 15, cx - 13, cy + 13);
-        p.curveTo(cx - 19, cy + 11, cx - 19, cy - 4, cx - 15, cy - 9);
-        p.closePath();
+        // Ankh Top Loop (Teardrop/Ellipse)
+        int loopW = (int) (width * 0.35);
+        int loopH = (int) (height * 0.40);
+        int loopX = cx - loopW / 2;
+        int loopY = (int) (cy - height * 0.42);
+        g2.draw(new Ellipse2D.Float(loopX, loopY, loopW, loopH));
 
-        g2.draw(p);
+        // Horizontal Arms
+        int armW = (int) (width * 0.65);
+        int armY = loopY + loopH;
+        g2.drawLine(cx - armW / 2, armY, cx + armW / 2, armY);
 
-        // D-Pad Cross (Left Side)
-        g2.setStroke(new BasicStroke(2.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g2.drawLine(cx - 9, cy - 3, cx - 9, cy + 3);
-        g2.drawLine(cx - 12, cy, cx - 6, cy);
-
-        // Action Buttons (Right Side)
-        g2.fill(new Ellipse2D.Float(cx + 7, cy - 4, 3, 3));
-        g2.fill(new Ellipse2D.Float(cx + 11, cy, 3, 3));
-
-        // Center Play Symbol
-        g2.setColor(ACCENT_CYAN);
-        Path2D playTri = new Path2D.Float();
-        playTri.moveTo(cx - 2, cy - 3);
-        playTri.lineTo(cx + 3, cy);
-        playTri.lineTo(cx - 2, cy + 3);
-        playTri.closePath();
-        g2.fill(playTri);
+        // Vertical Stem
+        int stemH = (int) (height * 0.42);
+        g2.drawLine(cx, armY, cx, armY + stemH);
 
         g2.dispose();
         return new ImageIcon(image);
@@ -133,7 +121,7 @@ public final class Theme {
         }
 
         // Derive title from filename for brand theme artwork fallback
-        String title = "NexaPlay";
+        String title = "Ankhvault";
         if (path != null) {
             if (path.toLowerCase().contains("tic")) title = "Tic Tac Toe";
             else if (path.toLowerCase().contains("snake")) title = "Snake";

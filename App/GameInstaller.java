@@ -6,7 +6,7 @@ import java.util.zip.ZipInputStream;
 
 /**
  * Real Game Download & Installation Engine
- * Downloads game build packages over HTTP/HTTPS and unzips them to LocalAppData/NexaPlay/Games/<GameId>/
+ * Downloads game build packages over HTTP/HTTPS and unzips them to LocalAppData/Ankhvault/Games/<GameId>/
  */
 public class GameInstaller {
     public interface DownloadProgressCallback {
@@ -20,7 +20,7 @@ public class GameInstaller {
         if (localAppData == null || localAppData.isEmpty()) {
             localAppData = System.getProperty("user.home");
         }
-        File baseDir = new File(localAppData, "NexaPlay/Games/" + gameId.toLowerCase());
+        File baseDir = new File(localAppData, "Ankhvault/Games/" + gameId.toLowerCase());
         if (!baseDir.exists()) baseDir.mkdirs();
         return baseDir;
     }
@@ -33,7 +33,7 @@ public class GameInstaller {
 
                 URL url = new URL(downloadUrlStr);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestProperty("User-Agent", "NexaPlay-Launcher/3.0");
+                conn.setRequestProperty("User-Agent", "Ankhvault-Launcher/3.0");
                 
                 int fileLength = conn.getContentLength();
                 InputStream input = conn.getInputStream();

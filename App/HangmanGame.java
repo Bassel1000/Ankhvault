@@ -20,7 +20,7 @@ public class HangmanGame extends JFrame {
     private final ModernButton guessBtn;
 
     public HangmanGame() {
-        setTitle("NexaPlay - Hangman");
+        setTitle("Ankhvault - Hangman");
         setSize(520, 520);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 import Snake.code.Snake;
 
-public class NexaPlay {
+public class Ankhvault {
 
     public static class Window extends JFrame {
         private final int appWidth;
@@ -41,7 +41,7 @@ public class NexaPlay {
             this.appHeight = height;
             this.currentUsername = (username != null && !username.trim().isEmpty()) ? username : "Guest";
 
-            setTitle("NexaPlay - Game Store & Launcher");
+            setTitle("Ankhvault - Game Store & Launcher");
             setIconImage(Theme.createTransparentLogoIcon(32, 32).getImage());
             setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             setSize(width, height);
@@ -115,11 +115,11 @@ public class NexaPlay {
             titleWrap.setLayout(new BoxLayout(titleWrap, BoxLayout.Y_AXIS));
             titleWrap.setOpaque(false);
 
-            JLabel title = new JLabel("NexaPlay");
+            JLabel title = new JLabel("Ankhvault");
             title.setFont(Theme.TITLE_H1);
-            title.setForeground(Theme.ACCENT_CYAN);
+            title.setForeground(Theme.ACCENT);
 
-            JLabel subtitle = new JLabel("Game Launcher & Store");
+            JLabel subtitle = new JLabel("Desktop Game Launcher & Store (Duat Studio)");
             subtitle.setFont(Theme.SMALL);
             subtitle.setForeground(Theme.TEXT_MUTED);
 
@@ -235,16 +235,17 @@ public class NexaPlay {
             center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
             center.setOpaque(false);
 
-            JLabel icon = new JLabel("🎮");
-            icon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 48));
+            JLabel icon = new JLabel("☥");
+            icon.setFont(new Font("Segoe UI", Font.PLAIN, 48));
+            icon.setForeground(Theme.ACCENT);
             icon.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-            JLabel msg = new JLabel("Your Library is Empty");
+            JLabel msg = new JLabel("Your Vault Library is Empty");
             msg.setFont(Theme.TITLE_H2);
             msg.setForeground(Theme.TEXT_PRIMARY);
             msg.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-            JLabel sub = new JLabel("Explore the Store and add your favorite games to start playing.");
+            JLabel sub = new JLabel("Explore the Store and unlock games for your Ankhvault library.");
             sub.setFont(Theme.BODY);
             sub.setForeground(Theme.TEXT_MUTED);
             sub.setAlignmentX(Component.CENTER_ALIGNMENT);

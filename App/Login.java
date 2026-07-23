@@ -1,177 +1,165 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.RoundRectangle2D;
 
 public class Login extends JFrame {
-    private JTextField usernameField;
-    private JPasswordField passwordField;
+
+    private JTextField userField;
+    private JPasswordField passField;
+    private final int appWidth;
+    private final int appHeight;
+
+    public Login() {
+        this(1280, 800);
+    }
 
     public Login(int width, int height) {
-        setTitle("NexaPlay - Sign In");
-        setSize(width, height);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.appWidth = width;
+        this.appHeight = height;
+
+        setTitle("Ankhvault - Sign In");
         setIconImage(Theme.createTransparentLogoIcon(32, 32).getImage());
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(460, 600);
         setLocationRelativeTo(null);
+        setResizable(false);
         Theme.applyRoot(this);
 
-        // Centered Wrapper Panel
-        JPanel rootPanel = new JPanel(new GridBagLayout());
-        rootPanel.setBackground(Theme.BG_ROOT);
+        JPanel mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBackground(Theme.BG_ROOT);
 
-        // Centered Glass Card Container
-        JPanel card = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                Theme.setupGraphics(g2);
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(Theme.BG_ELEVATED);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Theme.BORDER_STROKE, 1, true),
+                BorderFactory.createEmptyBorder(32, 36, 32, 36)
+        ));
 
-                int w = getWidth();
-                int h = getHeight();
-
-                g2.setColor(Theme.BG_ELEVATED);
-                g2.fill(new RoundRectangle2D.Float(0, 0, w, h, 20, 20));
-
-                g2.setColor(Theme.BORDER_STROKE);
-                g2.setStroke(new BasicStroke(1.5f));
-                g2.draw(new RoundRectangle2D.Float(1, 1, w - 2, h - 2, 20, 20));
-
-                g2.dispose();
-                super.paintComponent(g);
-            }
-        };
-
-        card.setOpaque(false);
-        card.setLayout(new GridBagLayout());
-        card.setPreferredSize(new Dimension(420, 480));
-        card.setBorder(BorderFactory.createEmptyBorder(32, 36, 32, 36));
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 0, 8, 0);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-
-        // Header Transparent Vector Logo & Text
-        JLabel logo = new JLabel(Theme.createTransparentLogoIcon(54, 54));
+        // Logo Header
+        JLabel logo = new JLabel(Theme.createRoundedIcon("Ankhvault Logo.png", 54, 54, 14));
         logo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel title = new JLabel("Welcome Back", SwingConstants.CENTER);
+        JLabel title = new JLabel("Ankhvault", SwingConstants.CENTER);
         title.setFont(Theme.TITLE_H1);
-        title.setForeground(Theme.TEXT_PRIMARY);
+        title.setForeground(Theme.ACCENT);
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JLabel subtitle = new JLabel("Sign in to continue to NexaPlay", SwingConstants.CENTER);
-        subtitle.setFont(Theme.BODY);
+        JLabel subtitle = new JLabel("Sign in to continue to Ankhvault", SwingConstants.CENTER);
+        subtitle.setFont(Theme.SMALL);
         subtitle.setForeground(Theme.TEXT_MUTED);
+        subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JPanel headBox = new JPanel();
-        headBox.setLayout(new BoxLayout(headBox, BoxLayout.Y_AXIS));
-        headBox.setOpaque(false);
-        headBox.add(logo);
-        headBox.add(Box.createVerticalStrut(12));
-        headBox.add(title);
-        headBox.add(Box.createVerticalStrut(4));
-        headBox.add(subtitle);
+        // Fields
+        JLabel userLabel = createFieldLabel("Username");
+        userField = createTextField();
 
-        card.add(headBox, gbc);
+        JLabel passLabel = createFieldLabel("Password");
+        passField = createPasswordField();
 
-        // Username Field
-        gbc.gridy++;
-        gbc.insets = new Insets(16, 0, 4, 0);
-        JLabel userLabel = new JLabel("Username");
-        userLabel.setFont(Theme.BODY);
-        userLabel.setForeground(Theme.TEXT_MUTED);
-        card.add(userLabel, gbc);
-
-        gbc.gridy++;
-        gbc.insets = new Insets(0, 0, 10, 0);
-        usernameField = createStyledTextField();
-        card.add(usernameField, gbc);
-
-        // Password Field
-        gbc.gridy++;
-        gbc.insets = new Insets(6, 0, 4, 0);
-        JLabel passLabel = new JLabel("Password");
-        passLabel.setFont(Theme.BODY);
-        passLabel.setForeground(Theme.TEXT_MUTED);
-        card.add(passLabel, gbc);
-
-        gbc.gridy++;
-        gbc.insets = new Insets(0, 0, 20, 0);
-        passwordField = createStyledPasswordField();
-        card.add(passwordField, gbc);
-
-        // Login Action Button
-        gbc.gridy++;
-        gbc.insets = new Insets(6, 0, 8, 0);
         ModernButton loginBtn = new ModernButton("Sign In", ModernButton.Style.PRIMARY, 12);
-        loginBtn.addActionListener(e -> attemptLogin(width, height));
-        card.add(loginBtn, gbc);
+        loginBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        loginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        loginBtn.addActionListener(e -> attemptLogin());
 
-        // Create Account Switch Button
-        gbc.gridy++;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        ModernButton registerBtn = new ModernButton("Create an Account", ModernButton.Style.OUTLINE, 12);
-        registerBtn.addActionListener(e -> {
-            new Register(width, height).setVisible(true);
-            dispose();
+        // Register Link
+        JPanel registerWrap = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 0));
+        registerWrap.setOpaque(false);
+
+        JLabel noAcc = new JLabel("Don't have an account?");
+        noAcc.setFont(Theme.SMALL);
+        noAcc.setForeground(Theme.TEXT_MUTED);
+
+        JLabel regLink = new JLabel("<html><u>Create One</u></html>");
+        regLink.setFont(Theme.SMALL);
+        regLink.setForeground(Theme.ACCENT_LIGHT);
+        regLink.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        regLink.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                dispose();
+                new Register(appWidth, appHeight).setVisible(true);
+            }
         });
-        card.add(registerBtn, gbc);
 
-        rootPanel.add(card);
-        getContentPane().add(rootPanel);
+        registerWrap.add(noAcc);
+        registerWrap.add(regLink);
+
+        card.add(logo);
+        card.add(Box.createVerticalStrut(12));
+        card.add(title);
+        card.add(Box.createVerticalStrut(4));
+        card.add(subtitle);
+        card.add(Box.createVerticalStrut(24));
+
+        card.add(userLabel);
+        card.add(Box.createVerticalStrut(6));
+        card.add(userField);
+        card.add(Box.createVerticalStrut(16));
+
+        card.add(passLabel);
+        card.add(Box.createVerticalStrut(6));
+        card.add(passField);
+        card.add(Box.createVerticalStrut(24));
+
+        card.add(loginBtn);
+        card.add(Box.createVerticalStrut(16));
+        card.add(registerWrap);
+
+        mainPanel.add(card);
+        add(mainPanel);
     }
 
-    private JTextField createStyledTextField() {
-        JTextField field = new JTextField();
-        field.setPreferredSize(new Dimension(340, 40));
-        field.setBackground(Theme.BG_ROOT);
-        field.setForeground(Theme.TEXT_PRIMARY);
-        field.setCaretColor(Theme.ACCENT);
-        field.setFont(Theme.BODY);
-        field.setBorder(BorderFactory.createCompoundBorder(
+    private JLabel createFieldLabel(String text) {
+        JLabel l = new JLabel(text);
+        l.setFont(Theme.SMALL);
+        l.setForeground(Theme.TEXT_PRIMARY);
+        l.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return l;
+    }
+
+    private JTextField createTextField() {
+        JTextField tf = new JTextField();
+        tf.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        tf.setBackground(Theme.BG_ROOT);
+        tf.setForeground(Theme.TEXT_PRIMARY);
+        tf.setCaretColor(Theme.ACCENT);
+        tf.setFont(Theme.BODY);
+        tf.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Theme.BORDER_STROKE, 1, true),
-                BorderFactory.createEmptyBorder(6, 12, 6, 12)
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
-        return field;
+        return tf;
     }
 
-    private JPasswordField createStyledPasswordField() {
-        JPasswordField field = new JPasswordField();
-        field.setPreferredSize(new Dimension(340, 40));
-        field.setBackground(Theme.BG_ROOT);
-        field.setForeground(Theme.TEXT_PRIMARY);
-        field.setCaretColor(Theme.ACCENT);
-        field.setFont(Theme.BODY);
-        field.setBorder(BorderFactory.createCompoundBorder(
+    private JPasswordField createPasswordField() {
+        JPasswordField pf = new JPasswordField();
+        pf.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        pf.setBackground(Theme.BG_ROOT);
+        pf.setForeground(Theme.TEXT_PRIMARY);
+        pf.setCaretColor(Theme.ACCENT);
+        pf.setFont(Theme.BODY);
+        pf.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Theme.BORDER_STROKE, 1, true),
-                BorderFactory.createEmptyBorder(6, 12, 6, 12)
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
-        return field;
+        return pf;
     }
 
-    private void attemptLogin(int width, int height) {
-        String username = usernameField.getText().trim();
-        String password = new String(passwordField.getPassword());
+    private void attemptLogin() {
+        String username = userField.getText().trim();
+        String password = new String(passField.getPassword()).trim();
 
         if (username.isEmpty() || password.isEmpty()) {
-            ToastManager.showToast(this, "Please enter both username and password");
+            JOptionPane.showMessageDialog(this, "Please enter both username and password.", "Sign In Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        if (DatabaseManager.getInstance().authenticateUser(username, password)) {
-            ToastManager.showToast(this, "Welcome back, " + username + "!");
-            new NexaPlay.Window(width, height, username).setVisible(true);
+        boolean valid = DatabaseManager.getInstance().authenticateUser(username, password);
+        if (valid) {
             dispose();
+            new Ankhvault.Window(appWidth, appHeight, username).setVisible(true);
         } else {
-            ToastManager.showToast(this, "Invalid credentials! Please try again or Register.");
+            JOptionPane.showMessageDialog(this, "Invalid username or password.", "Authentication Failed", JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            Rectangle bounds = env.getMaximumWindowBounds();
-            new Login(bounds.width, bounds.height).setVisible(true);
-        });
     }
 }

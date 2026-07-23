@@ -13,7 +13,7 @@ public class GuessTheNumberGame extends JFrame {
     private boolean gameOver = false;
 
     public GuessTheNumberGame() {
-        setTitle("NexaPlay - Guess The Number");
+        setTitle("Ankhvault - Guess The Number");
         setSize(460, 480);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);

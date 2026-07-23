@@ -46,7 +46,7 @@ public class BrandThemePainter {
                 drawGuessArt(g2, width, height);
                 break;
             default:
-                drawGenericNexaArt(g2, width, height, gameTitle);
+                drawGenericAnkhArt(g2, width, height, gameTitle);
                 break;
         }
 
@@ -192,7 +192,7 @@ public class BrandThemePainter {
         g2.drawString("?", cx - 55, cy + 30);
     }
 
-    private static void drawGenericNexaArt(Graphics2D g2, int w, int h, String titleText) {
+    private static void drawGenericAnkhArt(Graphics2D g2, int w, int h, String titleText) {
         int cx = w / 2;
         int cy = h / 2;
 

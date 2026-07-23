@@ -12,7 +12,7 @@ public class TicTacToeGame extends JFrame {
     private final ModernButton restartBtn;
 
     public TicTacToeGame() {
-        setTitle("NexaPlay - Tic Tac Toe");
+        setTitle("Ankhvault - Tic Tac Toe");
         setSize(440, 520);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);

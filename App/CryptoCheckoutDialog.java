@@ -20,7 +20,7 @@ public class CryptoCheckoutDialog extends JDialog {
     private ModernButton verifyCryptoBtn;
 
     public CryptoCheckoutDialog(JFrame parent, String username, List<GameItem> cartItems, double totalPrice, PaymentSuccessCallback callback) {
-        super(parent, "NexaPlay Checkout - Stablecoin x402 Payment Required", true);
+        super(parent, "Ankhvault Checkout - Stablecoin x402 Payment Required", true);
         this.username = username;
         this.cartItems = cartItems;
         this.totalPrice = totalPrice;
