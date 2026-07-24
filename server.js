@@ -8,8 +8,8 @@ app.use(cors());
 app.use(express.json());
 
 // Load Environment Variables with Fallbacks
-const TREASURY_SOL = process.env.TREASURY_SOL || "68MPta3vW2cNi2JYBtYPVLk8RFUHE5mAuAKppkik9mtb";
-const TREASURY_EVM = process.env.TREASURY_EVM || "0x58f9f0e213140b8f59382a8b195bcbe2e8e8d07a";
+const TREASURY_SOL = process.env.TREASURY_SOL || "2JxDavSJ9de1twMxDxdqz1sV3vkpYVDpPbx8qTy6q2cS";
+const TREASURY_EVM = process.env.TREASURY_EVM || "0x5efe4d14d5f406bb748fab14a3e2cda06e51a986";
 
 const storeCatalog = [
   { id: "kemet-01", title: "Shadow of Kemet", price: 14.99, genre: "Action RPG / Fantasy", developer: "Duat Studio" },
@@ -120,7 +120,7 @@ app.get('/', (req, res) => {
           </div>
           <div class="card">
             <h3>⚡ Stablecoin x402 Protocol</h3>
-            <p>Accept USDT, USDC, and USDG on-chain.</p>
+            <p>Accept USDT and USDC on-chain.</p>
             <div class="vault">EVM Vault: ${TREASURY_EVM}</div>
             <div class="vault">Solana Vault: ${TREASURY_SOL}</div>
           </div>

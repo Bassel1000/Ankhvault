@@ -199,6 +199,18 @@ export const App: React.FC = () => {
   const handleAddToCart = async (gameId: string) => {
     if (!currentUser) return;
 
+    const targetGame = catalog.find((g) => g.id === gameId);
+    if (targetGame && targetGame.price === 0) {
+      // Free Game! Claim directly to library!
+      await syncUserLibrarySupabase(currentUser, [gameId]);
+      if (isTauriAvailable()) {
+        await invoke('add_to_library', { username: currentUser, gameIds: [gameId] });
+      }
+      setUserLibrary((prev) => Array.from(new Set([...prev, gameId])));
+      showToast(`${targetGame.title} added to your Library for Free!`);
+      return;
+    }
+
     if (isTauriAvailable()) {
       await invoke('add_to_cart', { username: currentUser, gameId });
     }
@@ -368,7 +380,13 @@ export const App: React.FC = () => {
                   userCart={userCart}
                   onRemoveFromCart={handleRemoveFromCart}
                   onClearCart={handleClearCart}
-                  onCheckout={() => setIsCheckoutOpen(true)}
+                  onCheckout={() => {
+                    if (cartTotal === 0) {
+                      handlePaymentSuccess();
+                    } else {
+                      setIsCheckoutOpen(true);
+                    }
+                  }}
                 />
               )}
             </main>

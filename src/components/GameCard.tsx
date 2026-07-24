@@ -98,9 +98,18 @@ export const GameCard: React.FC<GameCardProps> = ({
             In Cart
           </button>
         ) : (
-          <button className="btn-gold" onClick={() => onAddToCart(game.id)}>
-            <ShoppingCart size={16} />
-            Add to Cart
+          <button className={game.price === 0 ? "btn-turquoise" : "btn-gold"} onClick={() => onAddToCart(game.id)}>
+            {game.price === 0 ? (
+              <>
+                <Download size={16} />
+                Get Free Game
+              </>
+            ) : (
+              <>
+                <ShoppingCart size={16} />
+                Add to Cart
+              </>
+            )}
           </button>
         )}
       </div>

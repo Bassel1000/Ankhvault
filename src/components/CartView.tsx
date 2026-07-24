@@ -90,11 +90,17 @@ export const CartView: React.FC<CartViewProps> = ({
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '0.8rem', marginBottom: '20px' }}>
               <ShieldCheck size={16} color="var(--accent-turquoise)" />
-              Payments settled 1:1 via USD Stablecoin x402 Gateway (USDT / USDC)
+              {subtotal === 0
+                ? "Free games require zero payment verification."
+                : "Payments settled 1:1 via USD Stablecoin x402 Gateway (USDT / USDC)"}
             </div>
 
-            <button className="btn-gold glow-pulse" onClick={onCheckout} style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1.05rem' }}>
-              Proceed to x402 Web3 Checkout
+            <button
+              className={subtotal === 0 ? "btn-turquoise glow-pulse" : "btn-gold glow-pulse"}
+              onClick={onCheckout}
+              style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1.05rem' }}
+            >
+              {subtotal === 0 ? "Claim Free Games" : "Proceed to x402 Web3 Checkout"}
             </button>
           </div>
         </div>
