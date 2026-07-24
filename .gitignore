@@ -5,6 +5,7 @@ bin/
 out/
 target/
 src-tauri/target/
+Duat_Studio_Website/
 
 # Package Logs
 npm-debug.log*

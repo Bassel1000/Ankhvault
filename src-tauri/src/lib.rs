@@ -63,13 +63,13 @@ async fn verify_x402_payment(tx_hash: String, token_symbol: String, amount_usd: 
 }
 
 #[tauri::command]
-fn check_game_installed(game_id: String) -> bool {
-    installer::check_game_installed(&game_id)
+fn check_game_installed(game_id: String, custom_base_dir: Option<String>) -> bool {
+    installer::check_game_installed(&game_id, custom_base_dir.as_deref())
 }
 
 #[tauri::command]
-fn launch_game_executable(game_id: String) -> Result<bool, String> {
-    installer::launch_game_executable(&game_id)
+fn launch_game_executable(game_id: String, custom_base_dir: Option<String>) -> Result<bool, String> {
+    installer::launch_game_executable(&game_id, custom_base_dir.as_deref())
 }
 
 #[tauri::command]
@@ -77,8 +77,9 @@ async fn download_and_install_game(
     app: AppHandle,
     game_id: String,
     download_url: String,
+    custom_base_dir: Option<String>,
 ) -> Result<String, String> {
-    installer::download_and_install_game(app, game_id, download_url).await
+    installer::download_and_install_game(app, game_id, download_url, custom_base_dir).await
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

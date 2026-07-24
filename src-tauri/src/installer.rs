@@ -4,8 +4,13 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use tauri::{AppHandle, Emitter};
 
-pub fn get_install_directory(game_id: &str) -> PathBuf {
+pub fn get_install_directory(game_id: &str, custom_base_dir: Option<&str>) -> PathBuf {
     let clean_id = game_id.to_lowercase().replace(|c: char| !c.is_alphanumeric(), "_");
+    if let Some(custom_path) = custom_base_dir {
+        if !custom_path.trim().is_empty() {
+            return PathBuf::from(custom_path).join(clean_id);
+        }
+    }
     dirs::data_local_dir()
         .unwrap_or_else(|| PathBuf::from("."))
         .join("Ankhvault")
@@ -41,13 +46,13 @@ pub fn find_executable(dir: &Path) -> Option<PathBuf> {
     None
 }
 
-pub fn check_game_installed(game_id: &str) -> bool {
-    let dir = get_install_directory(game_id);
+pub fn check_game_installed(game_id: &str, custom_base_dir: Option<&str>) -> bool {
+    let dir = get_install_directory(game_id, custom_base_dir);
     find_executable(&dir).is_some()
 }
 
-pub fn launch_game_executable(game_id: &str) -> Result<bool, String> {
-    let dir = get_install_directory(game_id);
+pub fn launch_game_executable(game_id: &str, custom_base_dir: Option<&str>) -> Result<bool, String> {
+    let dir = get_install_directory(game_id, custom_base_dir);
     let exe = find_executable(&dir).ok_or_else(|| format!("Game '{}' executable not found in {:?}", game_id, dir))?;
 
     #[cfg(target_os = "windows")]
@@ -88,8 +93,9 @@ pub async fn download_and_install_game(
     app: AppHandle,
     game_id: String,
     download_url: String,
+    custom_base_dir: Option<String>,
 ) -> Result<String, String> {
-    let install_dir = get_install_directory(&game_id);
+    let install_dir = get_install_directory(&game_id, custom_base_dir.as_deref());
     fs::create_dir_all(&install_dir).map_err(|e| e.to_string())?;
 
     // Emit progress event

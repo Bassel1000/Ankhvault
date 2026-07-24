@@ -129,18 +129,22 @@ export const App: React.FC = () => {
     }
   }, [currentUser]);
 
-  // Check installation status of games
+  const [customGamesDir, setCustomGamesDir] = useState<string>(
+    localStorage.getItem('ankhvault_games_dir') || ''
+  );
+
+  // Check installed games
   useEffect(() => {
-    if (!isTauriAvailable() || catalog.length === 0) return;
+    if (!isTauriAvailable()) return;
 
     catalog.forEach((game) => {
-      invoke<boolean>('check_game_installed', { gameId: game.id })
+      invoke<boolean>('check_game_installed', { gameId: game.id, customBaseDir: customGamesDir || null })
         .then((installed) => {
           setInstalledGames((prev) => ({ ...prev, [game.id]: installed }));
         })
         .catch(() => {});
     });
-  }, [catalog, userLibrary]);
+  }, [catalog, userLibrary, customGamesDir]);
 
   // Listen for Tauri download progress events
   useEffect(() => {
@@ -278,7 +282,11 @@ export const App: React.FC = () => {
   const handleDownloadAndInstall = async (gameId: string, url: string) => {
     if (isTauriAvailable()) {
       try {
-        await invoke('download_and_install_game', { gameId, downloadUrl: url });
+        await invoke('download_and_install_game', {
+          gameId,
+          downloadUrl: url,
+          customBaseDir: customGamesDir || null,
+        });
       } catch (err: any) {
         showToast(`Download error: ${err.toString()}`);
       }
@@ -297,7 +305,7 @@ export const App: React.FC = () => {
   const handleLaunchGame = async (gameId: string) => {
     if (isTauriAvailable()) {
       try {
-        await invoke('launch_game_executable', { gameId });
+        await invoke('launch_game_executable', { gameId, customBaseDir: customGamesDir || null });
         showToast(`Booting game executable...`);
       } catch (err: any) {
         showToast(`Launch error: ${err.toString()}`);
