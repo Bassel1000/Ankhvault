@@ -78,7 +78,7 @@ dependencies = [
 
 [[package]]
 name = "ankhvault-launcher"
-version = "3.0.0"
+version = "1.0.0"
 dependencies = [
  "aes-gcm",
  "base64 0.21.7",

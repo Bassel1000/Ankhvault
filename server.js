@@ -20,7 +20,7 @@ const storeCatalog = [
 ];
 
 app.get('/api/v1/health', (req, res) => {
-  res.json({ status: "online", platform: "Ankhvault Cloud", studio: "Duat Studio", version: "3.0.0", treasurySol: TREASURY_SOL, treasuryEvm: TREASURY_EVM });
+  res.json({ status: "online", platform: "Ankhvault Cloud", studio: "Duat Studio", version: "1.0.0", treasurySol: TREASURY_SOL, treasuryEvm: TREASURY_EVM });
 });
 
 app.get('/api/v1/games', (req, res) => {
