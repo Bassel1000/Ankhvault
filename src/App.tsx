@@ -397,6 +397,8 @@ export const App: React.FC = () => {
             isOpen={isCheckoutOpen}
             onClose={() => setIsCheckoutOpen(false)}
             totalAmount={cartTotal}
+            devWalletSol={catalog.find((g) => userCart.includes(g.id))?.dev_wallet_sol}
+            devWalletEvm={catalog.find((g) => userCart.includes(g.id))?.dev_wallet_evm}
             onPaymentSuccess={handlePaymentSuccess}
             onVerifyTransaction={handleVerifyTransaction}
           />

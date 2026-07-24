@@ -46,15 +46,19 @@ Ankhvault features a custom dual-palette design system tailored for high-DPI mod
 
 ---
 
-## 💳 3. Web3 Treasury Vaults & Payment Gateway
+### 💳 3. Web3 Treasury Vaults & Payment Gateway
 
 Ankhvault implements a **USD Stablecoin x402 Payment Gateway** providing 1:1 USD settlement for premium game catalog purchases.
 
-### Supported Payment Tokens
-- **USDT (Tether USD)**
-- **USDC (USD Coin)**
+### 💰 95% / 5% Automated Revenue Split System
+- **Developer Payout Share (95%)**: 95% of game sales revenue is routed directly to the Game Developer's registered wallet (`dev_wallet_sol` / `dev_wallet_evm`).
+- **Platform Fee Share (5%)**: 5% platform fee is routed to official Duat Studio Platform Treasury Vaults.
 
-### Official Duat Studio Platform Treasury Vaults
+### 📲 Mobile QR Code Generator & Supported Payment Tokens
+- **Interactive QR Codes**: High-contrast vector QR codes generated on-the-fly (`qrcode.react`) for Phantom, Solflare, MetaMask, Coinbase Wallet, and Trust Wallet instant mobile scan-to-pay.
+- **Supported Payment Tokens**: **USDT** (Tether) & **USDC** (USD Coin)
+
+### Official Duat Studio Platform Treasury Vaults (5% Platform Share)
 - **Solana Network (SPL Tokens)**:
   `2JxDavSJ9de1twMxDxdqz1sV3vkpYVDpPbx8qTy6q2cS`
 - **Base / EVM Network (ERC-20 Tokens)**:

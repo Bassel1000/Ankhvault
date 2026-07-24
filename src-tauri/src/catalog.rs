@@ -10,6 +10,8 @@ pub struct GameItem {
     pub description: String,
     pub tag: String,
     pub download_url: String,
+    pub dev_wallet_sol: Option<String>,
+    pub dev_wallet_evm: Option<String>,
 }
 
 pub fn get_default_catalog() -> Vec<GameItem> {
@@ -23,6 +25,8 @@ pub fn get_default_catalog() -> Vec<GameItem> {
             description: "Unravel ancient temple mysteries and slay mythical guardians in ancient Egypt.".to_string(),
             tag: "Flagship Title".to_string(),
             download_url: "https://github.com/duatstudio/downloads/releases/download/v1.0/shadow_kemet.zip".to_string(),
+            dev_wallet_sol: Some("2JxDavSJ9de1twMxDxdqz1sV3vkpYVDpPbx8qTy6q2cS".to_string()),
+            dev_wallet_evm: Some("0x5efe4d14d5f406bb748fab14a3e2cda06e51a986".to_string()),
         },
         GameItem {
             id: "nomad_racer".to_string(),
@@ -33,6 +37,8 @@ pub fn get_default_catalog() -> Vec<GameItem> {
             description: "High-octane neon drag racing across futuristic desert highways.".to_string(),
             tag: "Best Seller".to_string(),
             download_url: "https://github.com/duatstudio/downloads/releases/download/v1.0/nomad_racer.zip".to_string(),
+            dev_wallet_sol: Some("DevSolanaNomadRacer11111111111111111111111".to_string()),
+            dev_wallet_evm: Some("0x71C7656EC7ab88b098defB751B7401B5f6d8976F".to_string()),
         },
         GameItem {
             id: "aegis_protocol".to_string(),
@@ -43,6 +49,8 @@ pub fn get_default_catalog() -> Vec<GameItem> {
             description: "Competitive squad tactics and cybernetic combat in a dystopian city.".to_string(),
             tag: "Free to Play".to_string(),
             download_url: "https://github.com/duatstudio/downloads/releases/download/v1.0/aegis_protocol.zip".to_string(),
+            dev_wallet_sol: None,
+            dev_wallet_evm: None,
         },
         GameItem {
             id: "chronicles_duat".to_string(),
@@ -53,6 +61,8 @@ pub fn get_default_catalog() -> Vec<GameItem> {
             description: "Master ritual spells and summon celestial pharaohs in turn-based combat.".to_string(),
             tag: "New Release".to_string(),
             download_url: "https://github.com/duatstudio/downloads/releases/download/v1.0/chronicles_duat.zip".to_string(),
+            dev_wallet_sol: Some("2JxDavSJ9de1twMxDxdqz1sV3vkpYVDpPbx8qTy6q2cS".to_string()),
+            dev_wallet_evm: Some("0x5efe4d14d5f406bb748fab14a3e2cda06e51a986".to_string()),
         },
         GameItem {
             id: "neon_odyssey".to_string(),
@@ -63,6 +73,8 @@ pub fn get_default_catalog() -> Vec<GameItem> {
             description: "Explore uncharted galaxy sectors, mine rare plasma ores, and command dreadnoughts.".to_string(),
             tag: "Featured".to_string(),
             download_url: "https://github.com/duatstudio/downloads/releases/download/v1.0/neon_odyssey.zip".to_string(),
+            dev_wallet_sol: Some("DevSolanaNeonOdyssey2222222222222222222222".to_string()),
+            dev_wallet_evm: Some("0x2546Bc3200000000000000000000000000000000".to_string()),
         },
     ]
 }

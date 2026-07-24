@@ -10,6 +10,8 @@ export interface GameItem {
   description: string;
   tag: string;
   download_url: string;
+  dev_wallet_sol?: string;
+  dev_wallet_evm?: string;
 }
 
 interface GameCardProps {

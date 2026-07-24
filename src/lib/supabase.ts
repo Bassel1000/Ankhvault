@@ -14,6 +14,8 @@ export interface DbGame {
   description: string;
   tag: string;
   download_url: string;
+  dev_wallet_sol?: string;
+  dev_wallet_evm?: string;
 }
 
 export async function fetchCatalogFromSupabase(): Promise<DbGame[] | null> {
@@ -34,6 +36,8 @@ export async function fetchCatalogFromSupabase(): Promise<DbGame[] | null> {
       description: item.description,
       tag: item.tag,
       download_url: item.download_url,
+      dev_wallet_sol: item.dev_wallet_sol || undefined,
+      dev_wallet_evm: item.dev_wallet_evm || undefined,
     }));
   } catch (err) {
     console.warn('Supabase catalog fetch fallback:', err);
