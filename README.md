@@ -6,10 +6,10 @@
   ### Next-Generation Desktop Gaming Launcher & Store
   *A flagship product by **Duat Studio***
 
-  [![Java](https://img.shields.io/badge/Java-26-orange.svg)](https://adoptium.net/)
-  [![UI](https://img.shields.io/badge/UI-Pure%20Java%20Swing-blue.svg)]()
-  [![Security](https://img.shields.io/badge/Security-AES--256%20%2B%20SHA--256-green.svg)]()
-  [![Web3](https://img.shields.io/badge/Payments-USDT%20%7C%20USDC%20%7C%20USDG-purple.svg)]()
+  [![Rust](https://img.shields.io/badge/Rust-Tauri%202.0-orange.svg)](https://tauri.app/)
+  [![UI](https://img.shields.io/badge/UI-React%20%2B%20CSS%20Glassmorphism-blue.svg)]()
+  [![Security](https://img.shields.io/badge/Security-AES--256--GCM%20%2B%20SHA--256-green.svg)]()
+  [![Web3](https://img.shields.io/badge/Payments-USDT%20%7C%20USDC-purple.svg)]()
   [![Company](https://img.shields.io/badge/Studio-Duat%20Studio-gold.svg)]()
   [![License](https://img.shields.io/badge/License-MIT-green.svg)]()
 
@@ -19,7 +19,7 @@
 
 ## 🏛️ About Ankhvault
 
-**Ankhvault** (by **Duat Studio**) is a state-of-the-art desktop gaming launcher, store, and game platform built with **Java 26** and **Pure Java Swing**. Designed with a mythic, quiet, guardian-of-the-vault aesthetic, Ankhvault combines ultra-modern dark glassmorphism styling with high-performance vector graphics, an **AES-256 encrypted persistent database**, a **USD Stablecoin Crypto x402 Web3 Payment Gateway**, and 5 custom built-in mini-games.
+**Ankhvault** (by **Duat Studio**) is a state-of-the-art desktop gaming launcher, store, and game platform built with **Rust + Tauri 2.0** and **React CSS Glassmorphism**. Designed with a mythic, quiet, guardian-of-the-vault aesthetic, Ankhvault combines ultra-modern dark glassmorphism styling with high-performance GPU-accelerated graphics, an **AES-256-GCM encrypted persistent database**, a **USD Stablecoin Crypto x402 Web3 Payment Gateway**, automated ZIP package extraction, and native game process management.
 
 <div align="center">
   <img src="assets/Duat%20Studio%20Logo_Compressed.png" alt="Duat Studio Logo" width="320" />
@@ -40,54 +40,42 @@ Ankhvault features a custom dual-palette design system tailored for modern high-
 
 ## 🌟 Key Features & Enterprise Security
 
-- ⚡ **Java 26 Platform Performance**:
-  - **Generational ZGC**: Sub-millisecond GC pause times (<1ms) ensuring smooth 60 FPS repaints across all client windows, games, and UI animations.
-  - **Compact Object Headers**: Up to 50% lower heap memory overhead when managing store cards, asset caches, and inventory grids.
-  - **Modern Language & Vector Interop**: Flexible constructor bodies, pattern matching, and enhanced Java2D antialiased rendering.
+- ⚡ **Rust + Tauri 2.0 Engine Performance**:
+  - **Minimal Memory Overhead**: ~40–80 MB RAM footprint while games are running.
+  - **Native OS Execution**: High-speed process management (`std::process::Command`), sandboxing, and platform permission management.
 
-- 🔒 **Enterprise-Grade Vault Security (`DatabaseManager.java`)**:
+- 🔒 **Enterprise Vault Security (`src-tauri/src/db.rs`)**:
   - **SHA-256 Cryptographic Salted Hashing**: User credentials are cryptographically secured. Each account receives a unique 128-bit salt and SHA-256 hash.
-  - **AES-256 CBC Binary Database Encryption**: Database contents (`nexa_database.db` / `ankh_database.db`) are fully encrypted using 256-bit AES encryption with random Initialization Vectors (IV).
+  - **AES-256-GCM Binary Database Encryption**: Database contents are encrypted using 256-bit AES-GCM with unique Initialization Vectors (IV).
 
-- 🎨 **Pure Java Custom Design Engine**:
-  - **Antialiased Graphics**: Global 2D rendering hints for sharp vector curves, smooth text, and responsive UI components.
-  - **Modern Glassmorphism**: High-contrast dark theme with electric gold accents, scarab turquoise highlights, and custom dark scrollbars (`ModernScrollBarUI`).
-  - **Custom Component Architecture**: `ModernButton` (hover/press glow), `NavItem` (sidebar tabs with active gold indicator bars), `ResponsiveWrapGrid` (responsive store layout), and `ToastManager` (overlay notifications).
+- 🎨 **GPU-Accelerated Glassmorphism UI**:
+  - **Dark Glassmorphism**: High-contrast dark theme with electric gold accents, scarab turquoise highlights, backdrop blur panels, and smooth CSS transitions.
 
 - 🛒 **Store Cart & USD Stablecoin x402 Payment Gateway**:
   - **Game Catalog Pricing**: Free-to-play titles (`$0.00`) and premium games (`$4.99`, `$9.99`, `$14.99`).
-  - **Live Store Cart**: Interactive cart tab (`🛒 Cart (X)`) with dynamic subtotal calculations and badge counter.
-  - **USD Stablecoin x402 Web3 Checkout**: Built-in payment modal supporting **USDT (Tether)**, **USDC (USD Coin)**, and **USDG (Global Dollar)** with 1:1 USD settlement and instant wallet address copying.
+  - **USD Stablecoin x402 Web3 Checkout**: Built-in payment modal supporting **USDT (Tether)** and **USDC (USD Coin)** with 1:1 USD settlement.
+  - **Official Treasury Vaults**:
+    - **Solana**: `2JxDavSJ9de1twMxDxdqz1sV3vkpYVDpPbx8qTy6q2cS`
+    - **EVM (Base L2)**: `0x5efe4d14d5f406bb748fab14a3e2cda06e51a986`
 
-- 🚀 **Production Game Downloader & Launch Engine (`GameInstaller.java`)**:
+- 🚀 **Production Game Downloader & Launch Engine (`src-tauri/src/installer.rs`)**:
   - **Automated Package Extraction**: Downloads compressed game build archives over HTTPS/CDN directly into `%LOCALAPPDATA%/Ankhvault/Games/`.
-  - **Native Process Execution**: Discovers executable binaries (`.exe` / `.bat`) and boots game processes with isolated working directories via `ProcessBuilder`.
-  - **Store Catalog**: Features flagship titles including *Shadow of Kemet*, *Nomad Racer*, *Aegis Protocol*, *Chronicles of Duat*, and *Neon Odyssey*.
+  - **Native Process Execution**: Discovers executable binaries (`.exe`, `.bat`, `.sh`, `.appimage`) and boots game processes with isolated working directories.
 
 ---
 
 ## 🛠️ Build & Running Instructions
 
 ### Requirements
-- **Java JDK 26** or later (e.g., Eclipse Adoptium Temurin JDK 26).
+- **Rust toolchain** (1.75+)
+- **Node.js** (v18+) & **npm**
 
-### 1. Compile the Project
-Open a terminal in the `Ankhvault` project root directory and compile all Java source files into `./bin`:
-
-```bash
-# Windows PowerShell / Command Prompt
-& "C:\Program Files\Eclipse Adoptium\jdk-26.0.1.8-hotspot\bin\javac.exe" -d ./bin App/*.java App/Snake/code/*.java
-```
-
-### 2. Launch the Application
-Run the `Main` class to launch the Ankhvault launcher:
+### Launch Development App
+Run the Tauri 2.0 app with hot reloading:
 
 ```bash
-# Windows PowerShell
-& "C:\Program Files\Eclipse Adoptium\jdk-26.0.1.8-hotspot\bin\java.exe" -cp ./bin Main
+npm run tauri:dev
 ```
-
-*(Default sign-in credentials: `admin` / `admin123`, `demo` / `demo`, `guest` / `guest123`, or register a new account through the launcher UI!)*
 
 ---
 
