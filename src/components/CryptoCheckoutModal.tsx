@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Copy, CheckCircle2, ShieldCheck, QrCode, Loader2, DollarSign } from 'lucide-react';
+import { X, Copy, CheckCircle2, ShieldCheck, QrCode, Loader2, ArrowRightLeft } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 
 interface CryptoCheckoutModalProps {
@@ -27,30 +27,30 @@ export const CryptoCheckoutModal: React.FC<CryptoCheckoutModalProps> = ({
   const [txHash, setTxHash] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [copiedText, setCopiedText] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  // Platform Treasury Wallets (5% Platform Fee)
+  // Official Platform Treasury Vaults (Single Customer Deposit Address)
   const PLATFORM_SOL = '2JxDavSJ9de1twMxDxdqz1sV3vkpYVDpPbx8qTy6q2cS';
   const PLATFORM_EVM = '0x5efe4d14d5f406bb748fab14a3e2cda06e51a986';
 
-  // Developer Wallets (95% Dev Payout)
+  // Developer Target Wallets (Automated 95% Payout Destination)
   const DEV_SOL = devWalletSol || PLATFORM_SOL;
   const DEV_EVM = devWalletEvm || PLATFORM_EVM;
 
-  // 95% / 5% Payout Calculations
+  // 95% / 5% Revenue Split Calculations
   const platformFeeUsd = totalAmount * 0.05;
   const devPayoutUsd = totalAmount * 0.95;
 
   if (!isOpen) return null;
 
-  const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedText(label);
-    setTimeout(() => setCopiedText(null), 2000);
-  };
+  const activeAddress = selectedNetwork === 'SOL' ? PLATFORM_SOL : PLATFORM_EVM;
+  const activeDevWallet = selectedNetwork === 'SOL' ? DEV_SOL : DEV_EVM;
 
-  const activePlatformAddress = selectedNetwork === 'SOL' ? PLATFORM_SOL : PLATFORM_EVM;
-  const activeDevAddress = selectedNetwork === 'SOL' ? DEV_SOL : DEV_EVM;
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleVerify = async () => {
     if (!txHash.trim()) {
@@ -78,7 +78,7 @@ export const CryptoCheckoutModal: React.FC<CryptoCheckoutModalProps> = ({
 
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(5, 7, 10, 0.88)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '20px' }}>
-      <div className="glass-panel animate-fade-in" style={{ width: '580px', maxHeight: '90vh', overflowY: 'auto', padding: '32px', position: 'relative', border: '1px solid var(--accent-gold)' }}>
+      <div className="glass-panel animate-fade-in" style={{ width: '540px', maxHeight: '90vh', overflowY: 'auto', padding: '32px', position: 'relative', border: '1px solid var(--accent-gold)' }}>
         {/* Close Button */}
         <button onClick={onClose} style={{ position: 'absolute', right: '20px', top: '20px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
           <X size={20} />
@@ -92,16 +92,16 @@ export const CryptoCheckoutModal: React.FC<CryptoCheckoutModalProps> = ({
           </h2>
         </div>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.82rem', marginBottom: '20px' }}>
-          Instant 1:1 Settlement • 95% Developer Payout / 5% Platform Split
+          Single 1-Step Payment • Automated 95% Developer Split Settlement
         </p>
 
-        {/* Total Amount & Revenue Split Summary Banner */}
+        {/* Total Amount Banner */}
         <div className="glass-panel" style={{ padding: '16px 20px', backgroundColor: 'rgba(212, 175, 55, 0.08)', borderRadius: '10px', marginBottom: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <div>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', display: 'block' }}>Total Due</span>
-              <span style={{ color: 'var(--accent-gold)', fontSize: '1.5rem', fontWeight: 800 }}>
-                ${totalAmount.toFixed(2)} USD
+              <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', display: 'block' }}>Total Due (1 Single Payment)</span>
+              <span style={{ color: 'var(--accent-gold)', fontSize: '1.6rem', fontWeight: 800 }}>
+                ${totalAmount.toFixed(2)} {selectedToken}
               </span>
             </div>
             <span style={{ fontSize: '0.75rem', color: 'var(--accent-turquoise)', backgroundColor: 'rgba(23, 145, 158, 0.2)', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(23, 145, 158, 0.3)' }}>
@@ -109,16 +109,12 @@ export const CryptoCheckoutModal: React.FC<CryptoCheckoutModalProps> = ({
             </span>
           </div>
 
-          {/* 95% / 5% Revenue Breakdown Details */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', paddingTop: '10px', borderTop: '1px solid var(--border-stroke)', fontSize: '0.78rem' }}>
-            <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-              <span style={{ color: 'var(--accent-emerald)', fontWeight: 700, display: 'block' }}>🎮 Dev Share (95%)</span>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: '0.95rem' }}>${devPayoutUsd.toFixed(2)} {selectedToken}</span>
-            </div>
-            <div style={{ backgroundColor: 'rgba(212, 175, 55, 0.1)', padding: '8px 12px', borderRadius: '6px', border: '1px solid rgba(212, 175, 55, 0.3)' }}>
-              <span style={{ color: 'var(--accent-gold)', fontWeight: 700, display: 'block' }}>🏛️ Platform Fee (5%)</span>
-              <span style={{ color: 'var(--text-primary)', fontWeight: 800, fontSize: '0.95rem' }}>${platformFeeUsd.toFixed(2)} {selectedToken}</span>
-            </div>
+          {/* Automated Revenue Split Status */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '10px', borderTop: '1px solid var(--border-stroke)', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+            <ArrowRightLeft size={16} color="var(--accent-turquoise)" />
+            <span>
+              <strong>Automated Payout:</strong> 95% (${devPayoutUsd.toFixed(2)}) automatically disbursed to Game Developer • 5% (${platformFeeUsd.toFixed(2)}) Platform Vault.
+            </span>
           </div>
         </div>
 
@@ -195,75 +191,33 @@ export const CryptoCheckoutModal: React.FC<CryptoCheckoutModalProps> = ({
           </div>
         </div>
 
-        {/* Display Addresses & QR Code Generator */}
+        {/* SINGLE Payment Deposit Address & SINGLE Mobile QR Code */}
         <div style={{ marginBottom: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <label style={{ color: 'var(--text-secondary)', fontSize: '0.82rem', fontWeight: 600 }}>
-              Deposit Addresses & Mobile QR Codes ({selectedToken} on {selectedNetwork === 'SOL' ? 'Solana' : 'Base EVM'})
+              Deposit Address & Mobile QR Code
             </label>
-
-            <button
-              type="button"
-              onClick={() => setShowQrCode(!showQrCode)}
-              className="btn-outline"
-              style={{ padding: '4px 10px', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '4px' }}
-            >
-              <QrCode size={14} />
-              {showQrCode ? 'Hide QR Codes' : 'Show QR Codes'}
-            </button>
+            {copied && <span style={{ color: 'var(--accent-emerald)', fontSize: '0.78rem', fontWeight: 700 }}>Address Copied!</span>}
           </div>
 
-          {/* 1. Developer Payout Wallet (95%) */}
-          <div className="glass-panel" style={{ padding: '14px', marginBottom: '12px', backgroundColor: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ color: 'var(--accent-emerald)', fontSize: '0.78rem', fontWeight: 700 }}>
-                1. Developer Payout Wallet (95% = ${devPayoutUsd.toFixed(2)} {selectedToken})
-              </span>
-              {copiedText === 'dev' && <span style={{ color: 'var(--accent-emerald)', fontSize: '0.75rem' }}>Copied!</span>}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div className="glass-panel" style={{ padding: '16px', backgroundColor: 'rgba(11, 14, 20, 0.65)', border: '1px solid var(--border-active)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               {showQrCode && (
-                <div style={{ backgroundColor: '#ffffff', padding: '6px', borderRadius: '8px', display: 'inline-block' }}>
-                  <QRCodeSVG value={activeDevAddress} size={84} level="M" />
+                <div style={{ backgroundColor: '#ffffff', padding: '8px', borderRadius: '8px', flexShrink: 0 }}>
+                  <QRCodeSVG value={activeAddress} size={110} level="M" />
                 </div>
               )}
 
               <div style={{ flexGrow: 1, minWidth: 0 }}>
-                <code style={{ fontSize: '0.78rem', color: 'var(--text-primary)', wordBreak: 'break-all', display: 'block', marginBottom: '8px' }}>
-                  {activeDevAddress}
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', display: 'block', marginBottom: '4px' }}>
+                  Send exactly <strong>${totalAmount.toFixed(2)} {selectedToken}</strong> to:
+                </span>
+                <code style={{ fontSize: '0.82rem', color: 'var(--text-primary)', wordBreak: 'break-all', display: 'block', marginBottom: '10px' }}>
+                  {activeAddress}
                 </code>
-                <button onClick={() => copyToClipboard(activeDevAddress, 'dev')} className="btn-outline" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
-                  {copiedText === 'dev' ? <CheckCircle2 size={14} color="var(--accent-emerald)" /> : <Copy size={14} />}
-                  Copy Dev Address
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 2. Platform Treasury Fee Wallet (5%) */}
-          <div className="glass-panel" style={{ padding: '14px', backgroundColor: 'rgba(212, 175, 55, 0.05)', border: '1px solid rgba(212, 175, 55, 0.25)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <span style={{ color: 'var(--accent-gold)', fontSize: '0.78rem', fontWeight: 700 }}>
-                2. Platform Treasury Fee (5% = ${platformFeeUsd.toFixed(2)} {selectedToken})
-              </span>
-              {copiedText === 'platform' && <span style={{ color: 'var(--accent-emerald)', fontSize: '0.75rem' }}>Copied!</span>}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              {showQrCode && (
-                <div style={{ backgroundColor: '#ffffff', padding: '6px', borderRadius: '8px', display: 'inline-block' }}>
-                  <QRCodeSVG value={activePlatformAddress} size={84} level="M" />
-                </div>
-              )}
-
-              <div style={{ flexGrow: 1, minWidth: 0 }}>
-                <code style={{ fontSize: '0.78rem', color: 'var(--text-primary)', wordBreak: 'break-all', display: 'block', marginBottom: '8px' }}>
-                  {activePlatformAddress}
-                </code>
-                <button onClick={() => copyToClipboard(activePlatformAddress, 'platform')} className="btn-outline" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
-                  {copiedText === 'platform' ? <CheckCircle2 size={14} color="var(--accent-emerald)" /> : <Copy size={14} />}
-                  Copy Platform Address
+                <button onClick={() => copyToClipboard(activeAddress)} className="btn-outline" style={{ padding: '6px 12px', fontSize: '0.78rem' }}>
+                  {copied ? <CheckCircle2 size={14} color="var(--accent-emerald)" /> : <Copy size={14} />}
+                  Copy Address
                 </button>
               </div>
             </div>
@@ -273,7 +227,7 @@ export const CryptoCheckoutModal: React.FC<CryptoCheckoutModalProps> = ({
         {/* Tx Hash Signature Input */}
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 600, marginBottom: '6px' }}>
-            Transaction Hash / Signature
+            Transaction Signature / Hash
           </label>
           <input
             type="text"
@@ -309,10 +263,10 @@ export const CryptoCheckoutModal: React.FC<CryptoCheckoutModalProps> = ({
           {isVerifying ? (
             <>
               <Loader2 size={18} className="animate-spin" />
-              Verifying x402 Signature...
+              Verifying x402 On-Chain Settlement...
             </>
           ) : (
-            'Verify x402 On-Chain Settlement'
+            'Verify x402 Payment & Unlock Games'
           )}
         </button>
       </div>
