@@ -14,6 +14,7 @@ export interface DbGame {
   description: string;
   tag: string;
   download_url: string;
+  developer_name?: string;
   dev_wallet_sol?: string;
   dev_wallet_evm?: string;
 }
@@ -36,12 +37,35 @@ export async function fetchCatalogFromSupabase(): Promise<DbGame[] | null> {
       description: item.description,
       tag: item.tag,
       download_url: item.download_url,
+      developer_name: item.developer_name || undefined,
       dev_wallet_sol: item.dev_wallet_sol || undefined,
       dev_wallet_evm: item.dev_wallet_evm || undefined,
     }));
   } catch (err) {
     console.warn('Supabase catalog fetch fallback:', err);
     return null;
+  }
+}
+
+export async function registerDeveloperProfileSupabase(
+  developerName: string,
+  email: string,
+  devWalletSol: string,
+  devWalletEvm: string
+) {
+  try {
+    await supabase.from('developer_profiles').upsert(
+      {
+        developer_name: developerName,
+        email,
+        dev_wallet_sol: devWalletSol,
+        dev_wallet_evm: devWalletEvm,
+        payout_split_percent: 95.00,
+      },
+      { onConflict: 'developer_name' }
+    );
+  } catch (err) {
+    console.warn('Developer profile registration error:', err);
   }
 }
 
