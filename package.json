@@ -13,6 +13,7 @@
     "server": "node server.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.8",
     "@tauri-apps/api": "^2.0.0",
     "@tauri-apps/plugin-shell": "^2.0.0",
     "cors": "^2.8.5",

@@ -11,6 +11,13 @@ import { CryptoCheckoutModal } from './components/CryptoCheckoutModal';
 import { AuthModal } from './components/AuthModal';
 import './styles/glassmorphism.css';
 
+import {
+  fetchCatalogFromSupabase,
+  fetchUserLibrarySupabase,
+  syncUserLibrarySupabase,
+  recordX402TransactionSupabase,
+} from './lib/supabase';
+
 // Fallback Mock Catalog if running in standard browser dev mode
 const MOCK_CATALOG: GameItem[] = [
   {
@@ -91,9 +98,25 @@ export const App: React.FC = () => {
   useEffect(() => {
     if (!currentUser) return;
 
+    // Fetch live catalog from Supabase
+    fetchCatalogFromSupabase().then((dbCatalog) => {
+      if (dbCatalog && dbCatalog.length > 0) {
+        setCatalog(dbCatalog);
+      }
+    });
+
+    // Fetch live user library from Supabase
+    fetchUserLibrarySupabase(currentUser).then((dbLib) => {
+      if (dbLib) {
+        setUserLibrary(dbLib);
+      }
+    });
+
     if (isTauriAvailable()) {
       invoke<GameItem[]>('get_catalog')
-        .then(setCatalog)
+        .then((localCat) => {
+          if (localCat && localCat.length > 0) setCatalog(localCat);
+        })
         .catch(console.error);
 
       invoke<string[]>('get_user_library', { username: currentUser })
@@ -224,13 +247,18 @@ export const App: React.FC = () => {
   const handlePaymentSuccess = async () => {
     if (!currentUser) return;
 
+    const newLibrary = Array.from(new Set([...userLibrary, ...userCart]));
+
+    // Sync to Supabase Cloud
+    await syncUserLibrarySupabase(currentUser, userCart);
+
     if (isTauriAvailable()) {
       await invoke('add_to_library', { username: currentUser, gameIds: userCart });
     }
 
-    setUserLibrary((prev) => Array.from(new Set([...prev, ...userCart])));
+    setUserLibrary(newLibrary);
     setUserCart([]);
-    showToast('Payment successful! Games added to your Library.');
+    showToast('Payment successful! Games synced to your Cloud Library.');
     setActiveTab('library');
   };
 
