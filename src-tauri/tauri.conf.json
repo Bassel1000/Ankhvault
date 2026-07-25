@@ -49,5 +49,12 @@
         "installMode": "both"
       }
     }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/Duat-Studio/Ankhvault/releases/latest/download/latest.json"
+      ]
+    }
   }
 }

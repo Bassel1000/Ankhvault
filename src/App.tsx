@@ -10,6 +10,7 @@ import { GameItem } from './components/GameCard';
 import { MoonPayCheckoutModal } from './components/MoonPayCheckoutModal';
 import { AuthModal } from './components/AuthModal';
 import { AccountModal } from './components/AccountModal';
+import { UpdateModal } from './components/UpdateModal';
 import './styles/glassmorphism.css';
 
 import {
@@ -34,6 +35,7 @@ export const App: React.FC = () => {
   
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -333,6 +335,7 @@ export const App: React.FC = () => {
             setSearchQuery={setSearchQuery}
             onLogout={handleLogout}
             onOpenAccountModal={() => setIsAccountModalOpen(true)}
+            onOpenUpdateModal={() => setIsUpdateModalOpen(true)}
           />
 
           {/* Main Content Layout */}
@@ -407,6 +410,12 @@ export const App: React.FC = () => {
             onChangeUsername={handleChangeUsername}
             onChangePassword={handleChangePassword}
             onDeleteAccount={handleDeleteAccount}
+          />
+
+          {/* In-App Auto-Update Modal */}
+          <UpdateModal
+            isOpen={isUpdateModalOpen}
+            onClose={() => setIsUpdateModalOpen(false)}
           />
         </>
       )}

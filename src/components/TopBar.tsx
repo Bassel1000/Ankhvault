@@ -8,6 +8,7 @@ interface TopBarProps {
   setSearchQuery: (query: string) => void;
   onLogout: () => void;
   onOpenAccountModal: () => void;
+  onOpenUpdateModal?: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -16,6 +17,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   setSearchQuery,
   onLogout,
   onOpenAccountModal,
+  onOpenUpdateModal,
 }) => {
   return (
     <header className="glass-panel" style={{ borderRadius: 0, borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '14px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 50 }}>
@@ -59,6 +61,19 @@ export const TopBar: React.FC<TopBarProps> = ({
           />
         </div>
 
+        {/* Check for Updates Button */}
+        {onOpenUpdateModal && (
+          <button
+            onClick={onOpenUpdateModal}
+            className="btn-outline"
+            style={{ padding: '8px 12px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+            title="Check for Launcher Updates"
+          >
+            <Settings size={14} color="var(--accent-gold)" />
+            Updates
+          </button>
+        )}
+
         {/* User Account Badge (Click to open Account Management) */}
         <div
           onClick={onOpenAccountModal}
@@ -70,7 +85,6 @@ export const TopBar: React.FC<TopBarProps> = ({
           <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.9rem' }}>
             {currentUsername}
           </span>
-          <Settings size={14} color="var(--accent-gold)" style={{ marginLeft: '4px' }} />
         </div>
 
         {/* Logout Button */}
