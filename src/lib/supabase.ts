@@ -1,7 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://nehtpnrmkipmikutcjbr.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_6eDmlkZxa0YnaWb6KkwRIQ_XtcNVlze';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Copy .env.example to .env and fill in your values.');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -42,7 +46,7 @@ export async function fetchCatalogFromSupabase(): Promise<DbGame[] | null> {
       dev_wallet_evm: item.dev_wallet_evm || undefined,
     }));
   } catch (err) {
-    console.warn('Supabase catalog fetch fallback:', err);
+    console.warn('Supabase catalog fetch error:', err);
     return null;
   }
 }
@@ -71,10 +75,7 @@ export async function registerDeveloperProfileSupabase(
 
 export async function syncUserLibrarySupabase(username: string, gameIds: string[]) {
   try {
-    const inserts = gameIds.map((game_id) => ({
-      username,
-      game_id,
-    }));
+    const inserts = gameIds.map((game_id) => ({ username, game_id }));
     await supabase.from('user_libraries').upsert(inserts, { onConflict: 'username,game_id' });
   } catch (err) {
     console.warn('Supabase library sync error:', err);

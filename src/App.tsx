@@ -18,66 +18,12 @@ import {
   recordX402TransactionSupabase,
 } from './lib/supabase';
 
-// Fallback Mock Catalog if running in standard browser dev mode
-const MOCK_CATALOG: GameItem[] = [
-  {
-    id: "shadow_kemet",
-    title: "Shadow of Kemet",
-    category: "Action / RPG",
-    price: 14.99,
-    rating: 4.9,
-    description: "Unravel ancient temple mysteries and slay mythical guardians in ancient Egypt.",
-    tag: "Flagship Title",
-    download_url: "https://github.com/duatstudio/downloads/releases/download/v1.0/shadow_kemet.zip",
-  },
-  {
-    id: "nomad_racer",
-    title: "Nomad Racer",
-    category: "Cyberpunk Racing",
-    price: 9.99,
-    rating: 4.7,
-    description: "High-octane neon drag racing across futuristic desert highways.",
-    tag: "Best Seller",
-    download_url: "https://github.com/duatstudio/downloads/releases/download/v1.0/nomad_racer.zip",
-  },
-  {
-    id: "aegis_protocol",
-    title: "Aegis Protocol",
-    category: "Tactical Shooter",
-    price: 0.00,
-    rating: 4.8,
-    description: "Competitive squad tactics and cybernetic combat in a dystopian city.",
-    tag: "Free to Play",
-    download_url: "https://github.com/duatstudio/downloads/releases/download/v1.0/aegis_protocol.zip",
-  },
-  {
-    id: "chronicles_duat",
-    title: "Chronicles of Duat",
-    category: "Strategy / Deckbuilder",
-    price: 4.99,
-    rating: 4.6,
-    description: "Master ritual spells and summon celestial pharaohs in turn-based combat.",
-    tag: "New Release",
-    download_url: "https://github.com/duatstudio/downloads/releases/download/v1.0/chronicles_duat.zip",
-  },
-  {
-    id: "neon_odyssey",
-    title: "Neon Odyssey",
-    category: "Space Simulator",
-    price: 14.99,
-    rating: 4.9,
-    description: "Explore uncharted galaxy sectors, mine rare plasma ores, and command dreadnoughts.",
-    tag: "Featured",
-    download_url: "https://github.com/duatstudio/downloads/releases/download/v1.0/neon_odyssey.zip",
-  },
-];
-
 export const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<ActiveTab>('store');
   const [searchQuery, setSearchQuery] = useState('');
   
-  const [catalog, setCatalog] = useState<GameItem[]>(MOCK_CATALOG);
+  const [catalog, setCatalog] = useState<GameItem[]>([]);
   const [userLibrary, setUserLibrary] = useState<string[]>([]);
   const [userCart, setUserCart] = useState<string[]>([]);
   const [installedGames, setInstalledGames] = useState<Record<string, boolean>>({});
