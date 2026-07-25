@@ -68,7 +68,6 @@ export async function registerUserProfileSupabase(username: string, email: strin
 
 export async function updateUsernameSupabase(oldUsername: string, newUsername: string): Promise<boolean> {
   try {
-    // 1. Check if newUsername is already taken in user_profiles
     const { data: existing } = await supabase
       .from('user_profiles')
       .select('username')
@@ -76,16 +75,14 @@ export async function updateUsernameSupabase(oldUsername: string, newUsername: s
       .maybeSingle();
 
     if (existing) {
-      return false; // Username taken
+      return false;
     }
 
-    // 2. Update user_profiles
     await supabase
       .from('user_profiles')
       .update({ username: newUsername, updated_at: new Date().toISOString() })
       .eq('username', oldUsername);
 
-    // 3. Update user_libraries username reference
     await supabase
       .from('user_libraries')
       .update({ username: newUsername })
@@ -152,16 +149,16 @@ export async function fetchUserLibrarySupabase(username: string): Promise<string
   }
 }
 
-export async function recordX402TransactionSupabase(
+export async function recordMoonPayTransactionSupabase(
   username: string,
-  txHash: string,
+  orderId: string,
   tokenSymbol: string,
   amountUsd: number
 ) {
   try {
-    await supabase.from('x402_transactions').insert({
+    await supabase.from('moonpay_transactions').insert({
       username,
-      tx_hash: txHash,
+      order_id: orderId,
       token_symbol: tokenSymbol,
       amount_usd: amountUsd,
     });
