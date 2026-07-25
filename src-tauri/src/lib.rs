@@ -58,8 +58,8 @@ fn add_to_library(state: State<'_, AppState>, username: String, game_ids: Vec<St
 }
 
 #[tauri::command]
-async fn verify_x402_payment(tx_hash: String, token_symbol: String, amount_usd: f64) -> VerificationResult {
-    web3::verify_on_chain_transaction(&tx_hash, &token_symbol, amount_usd).await
+async fn verify_moonpay_payment(order_id: String, token_symbol: String, amount_usd: f64) -> VerificationResult {
+    web3::verify_moonpay_transaction(&order_id, &token_symbol, amount_usd).await
 }
 
 #[tauri::command]
@@ -99,7 +99,7 @@ pub fn run() {
             remove_from_cart,
             clear_cart,
             add_to_library,
-            verify_x402_payment,
+            verify_moonpay_payment,
             check_game_installed,
             launch_game_executable,
             download_and_install_game

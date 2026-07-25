@@ -65,9 +65,7 @@ impl DatabaseManager {
     }
 
     fn seed_defaults(&mut self) {
-        self.register_user("admin", "admin@ankhvault.io", "admin123").ok();
-        self.register_user("demo", "demo@ankhvault.io", "demo").ok();
-        self.register_user("guest", "guest@ankhvault.io", "guest123").ok();
+        // Dynamic initialization on first run (no hardcoded default admin accounts)
     }
 
     pub fn generate_salt() -> Vec<u8> {

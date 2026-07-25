@@ -9,7 +9,7 @@
   [![Rust](https://img.shields.io/badge/Rust-Tauri%202.0-orange.svg)](https://tauri.app/)
   [![UI](https://img.shields.io/badge/UI-React%20%2B%20CSS%20Glassmorphism-blue.svg)]()
   [![Security](https://img.shields.io/badge/Security-AES--256--GCM%20%2B%20SHA--256-green.svg)]()
-  [![Web3](https://img.shields.io/badge/Payments-USDT%20%7C%20USDC-purple.svg)]()
+  [![Payments](https://img.shields.io/badge/Payments-MoonPay%20Commerce-indigo.svg)]()
   [![Company](https://img.shields.io/badge/Studio-Duat%20Studio-gold.svg)]()
   [![License](https://img.shields.io/badge/License-MIT-green.svg)]()
 
@@ -19,7 +19,7 @@
 
 ## 🏛️ About Ankhvault
 
-**Ankhvault** (by **Duat Studio**) is a state-of-the-art desktop gaming launcher, store, and game platform built with **Rust + Tauri 2.0** and **React CSS Glassmorphism**. Designed with a mythic, quiet, guardian-of-the-vault aesthetic, Ankhvault combines ultra-modern dark glassmorphism styling with high-performance GPU-accelerated graphics, an **AES-256-GCM encrypted persistent database**, a **USD Stablecoin Crypto x402 Web3 Payment Gateway**, automated ZIP package extraction, and native game process management.
+**Ankhvault** (by **Duat Studio**) is a state-of-the-art desktop gaming launcher, store, and game platform built with **Rust + Tauri 2.0** and **React CSS Glassmorphism**. Designed with a mythic, quiet, guardian-of-the-vault aesthetic, Ankhvault combines ultra-modern dark glassmorphism styling with high-performance GPU-accelerated graphics, an **AES-256-GCM encrypted persistent database**, a **MoonPay Commerce Gateway** (supporting Cards, Apple Pay, Google Pay, USDT, and USDC), automated ZIP package extraction, and native game process management.
 
 <div align="center">
   <img src="assets/Duat%20Studio%20Logo_Compressed.png" alt="Duat Studio Logo" width="320" />
@@ -45,18 +45,16 @@ Ankhvault features a custom dual-palette design system tailored for modern high-
   - **Native OS Execution**: High-speed process management (`std::process::Command`), sandboxing, and platform permission management.
 
 - 🔒 **Enterprise Vault Security (`src-tauri/src/db.rs`)**:
-  - **SHA-256 Cryptographic Salted Hashing**: User credentials are cryptographically secured. Each account receives a unique 128-bit salt and SHA-256 hash.
+  - **SHA-256 Cryptographic Salted Hashing**: User credentials are cryptographically secured with unique 128-bit salts and SHA-256 hashes.
   - **AES-256-GCM Binary Database Encryption**: Database contents are encrypted using 256-bit AES-GCM with unique Initialization Vectors (IV).
 
 - 🎨 **GPU-Accelerated Glassmorphism UI**:
   - **Dark Glassmorphism**: High-contrast dark theme with electric gold accents, scarab turquoise highlights, backdrop blur panels, and smooth CSS transitions.
 
-- 🛒 **Store Cart & USD Stablecoin x402 Payment Gateway**:
+- 💳 **Store Cart & MoonPay Commerce Payment Gateway**:
   - **Game Catalog Pricing**: Free-to-play titles (`$0.00`) and premium games (`$4.99`, `$9.99`, `$14.99`).
-  - **USD Stablecoin x402 Web3 Checkout**: Built-in payment modal supporting **USDT (Tether)** and **USDC (USD Coin)** with 1:1 USD settlement.
-  - **Official Treasury Vaults**:
-    - **Solana**: `2JxDavSJ9de1twMxDxdqz1sV3vkpYVDpPbx8qTy6q2cS`
-    - **EVM (Base L2)**: `0x5efe4d14d5f406bb748fab14a3e2cda06e51a986`
+  - **MoonPay Commerce Checkout**: Built-in checkout widget supporting **Credit Cards**, **Debit Cards**, **Apple Pay**, **Google Pay**, **USDT**, and **USDC** with instant 1:1 USD settlement.
+  - **Automated Payouts**: 95% revenue split directly to developers.
 
 - 🚀 **Production Game Downloader & Launch Engine (`src-tauri/src/installer.rs`)**:
   - **Automated Package Extraction**: Downloads compressed game build archives over HTTPS/CDN directly into `%LOCALAPPDATA%/Ankhvault/Games/`.

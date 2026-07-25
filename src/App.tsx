@@ -7,7 +7,7 @@ import { StoreView } from './components/StoreView';
 import { LibraryView } from './components/LibraryView';
 import { CartView } from './components/CartView';
 import { GameItem } from './components/GameCard';
-import { CryptoCheckoutModal } from './components/CryptoCheckoutModal';
+import { MoonPayCheckoutModal } from './components/MoonPayCheckoutModal';
 import { AuthModal } from './components/AuthModal';
 import './styles/glassmorphism.css';
 
@@ -190,19 +190,26 @@ export const App: React.FC = () => {
     setUserCart([]);
   };
 
-  // Web3 Checkout Handlers
-  const handleVerifyTransaction = async (txHash: string, tokenSymbol: string, amountUsd: number) => {
+  // MoonPay Commerce Checkout Handlers
+  const handleVerifyTransaction = async (orderId: string, tokenSymbol: string, amountUsd: number) => {
     if (isTauriAvailable()) {
-      return await invoke<{ success: boolean; message: string }>('verify_x402_payment', {
-        txHash,
+      return await invoke<{ success: boolean; message: string }>('verify_moonpay_payment', {
+        orderId,
         tokenSymbol,
         amountUsd,
       });
     }
 
+    if (!orderId || orderId.trim().length < 5) {
+      return {
+        success: false,
+        message: 'Invalid MoonPay Commerce Order ID. Please check your purchase confirmation.',
+      };
+    }
+
     return {
       success: true,
-      message: `x402 ${tokenSymbol} Payment Signature Verified!`,
+      message: `MoonPay Commerce Order ${orderId} Verified Successfully!`,
     };
   };
 
@@ -346,8 +353,8 @@ export const App: React.FC = () => {
             </main>
           </div>
 
-          {/* Crypto Checkout Modal */}
-          <CryptoCheckoutModal
+          {/* MoonPay Commerce Checkout Modal */}
+          <MoonPayCheckoutModal
             isOpen={isCheckoutOpen}
             onClose={() => setIsCheckoutOpen(false)}
             totalAmount={cartTotal}

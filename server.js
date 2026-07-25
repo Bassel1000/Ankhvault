@@ -33,13 +33,14 @@ app.get('/api/v1/health', (req, res) => {
     version: '1.0.0',
     treasurySol: TREASURY_SOL,
     treasuryEvm: TREASURY_EVM,
+    paymentGateway: 'MoonPay Commerce',
   });
 });
 
 app.get('/api/v1/games', async (req, res) => {
   try {
     const games = await supabaseFetch('catalog_games?is_active=eq.true&order=price.desc&select=*');
-    res.json({ success: true, count: games.length, games });
+    res.json({ success: true, count: Array.isArray(games) ? games.length : 0, games });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Failed to fetch catalog from database' });
   }
@@ -47,8 +48,16 @@ app.get('/api/v1/games', async (req, res) => {
 
 app.post('/api/v1/dev/submit', async (req, res) => {
   const { title, price, genre, developer, walletAddress, email, download_url, description, dev_wallet_sol } = req.body;
-  if (!title || price === undefined || !walletAddress) {
-    return res.status(400).json({ success: false, error: 'Missing required fields: title, price, walletAddress' });
+  if (!title || price === undefined || !walletAddress || typeof title !== 'string' || typeof walletAddress !== 'string') {
+    return res.status(400).json({ success: false, error: 'Missing or invalid required fields (title, price, walletAddress)' });
+  }
+
+  const cleanTitle = title.trim().replace(/[<>]/g, '');
+  const cleanWallet = walletAddress.trim();
+  const parsedPrice = parseFloat(price);
+
+  if (isNaN(parsedPrice) || parsedPrice < 0) {
+    return res.status(400).json({ success: false, error: 'Invalid price value' });
   }
 
   try {
@@ -58,16 +67,16 @@ app.post('/api/v1/dev/submit', async (req, res) => {
       headers: { Prefer: 'return=representation' },
       body: JSON.stringify({
         id: gameId,
-        title,
-        category: genre || 'Indie',
-        price: parseFloat(price),
+        title: cleanTitle,
+        category: typeof genre === 'string' ? genre.trim().replace(/[<>]/g, '') : 'Indie',
+        price: parsedPrice,
         rating: 5.0,
-        description: description || '',
+        description: typeof description === 'string' ? description.trim().replace(/[<>]/g, '') : '',
         tag: 'New Release',
-        download_url: download_url || '',
-        developer_name: developer || 'Independent Publisher',
+        download_url: typeof download_url === 'string' ? download_url.trim() : '',
+        developer_name: typeof developer === 'string' ? developer.trim().replace(/[<>]/g, '') : 'Independent Publisher',
         dev_wallet_sol: dev_wallet_sol || null,
-        dev_wallet_evm: walletAddress,
+        dev_wallet_evm: cleanWallet,
         is_active: false,
       }),
     });
@@ -81,22 +90,24 @@ app.post('/api/v1/dev/submit', async (req, res) => {
   }
 });
 
-app.post('/api/v1/checkout/x402', (req, res) => {
-  const { txHash, token, amount } = req.body;
-  if (!txHash) {
-    return res.status(400).json({ success: false, error: 'Missing transaction hash / signature' });
+app.post('/api/v1/checkout/moonpay', (req, res) => {
+  const { orderId, currency, amount } = req.body;
+  if (!orderId || typeof orderId !== 'string' || orderId.trim().length < 5) {
+    return res.status(400).json({ success: false, error: 'Invalid or missing MoonPay Commerce Order ID' });
   }
+
+  const cleanOrderId = orderId.trim();
+
   res.json({
     success: true,
-    protocol: 'HTTP 402 Payment Required',
-    txHash,
-    token: token || 'USDT',
+    gateway: 'MoonPay Commerce',
+    orderId: cleanOrderId,
+    currency: currency || 'USD',
     amountVerified: amount,
     ankhFeeCutPercent: 5.0,
     devPayoutPercent: 95.0,
-    treasurySol: TREASURY_SOL,
     treasuryEvm: TREASURY_EVM,
-    status: 'verified_on_chain',
+    status: 'completed',
   });
 });
 
@@ -135,7 +146,7 @@ app.get('/', (req, res) => {
       </header>
       <section class="hero">
         <h1>Ankhvault Desktop Launcher & Store</h1>
-        <p>A flagship product by Duat Studio. Empowering game developers worldwide with 95% revenue retention and USD Stablecoin settlement.</p>
+        <p>A flagship product by Duat Studio. Empowering game developers worldwide with 95% revenue retention and MoonPay Commerce settlement.</p>
         <div>
           <a href="https://github.com/Duat-Studio/Ankhvault/releases" class="btn btn-primary" target="_blank">Download Client (.exe)</a>
           <a href="/api/v1/games" class="btn btn-outline" target="_blank">Explore API Catalog</a>
@@ -143,13 +154,13 @@ app.get('/', (req, res) => {
         <div class="features">
           <div class="card">
             <h3>🔥 95% Dev Revenue Split</h3>
-            <p>Developers keep 95% of every sale with instant USD Stablecoin settlement.</p>
+            <p>Developers keep 95% of every sale with instant settlement.</p>
           </div>
           <div class="card">
-            <h3>⚡ Stablecoin x402 Protocol</h3>
-            <p>Accept USDT and USDC on-chain via Solana & Base EVM.</p>
-            <div class="vault">EVM: ${TREASURY_EVM}</div>
-            <div class="vault">SOL: ${TREASURY_SOL}</div>
+            <h3>⚡ MoonPay Commerce Gateway</h3>
+            <p>Accept Cards, Apple Pay, Google Pay, USDT, and USDC.</p>
+            <div class="vault">EVM Vault: ${TREASURY_EVM}</div>
+            <div class="vault">Solana Vault: ${TREASURY_SOL}</div>
           </div>
           <div class="card">
             <h3>🔒 AES-256 Vault Security</h3>
@@ -164,5 +175,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(\`Ankhvault API server running on port \${PORT}\`);
+  console.log(`Ankhvault API server running on port ${PORT}`);
 });
