@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       <div style={{ marginTop: 'auto', padding: '16px 12px', borderTop: '1px solid var(--border-stroke)' }}>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.72rem', lineHeight: '1.4' }}>
-          Ankhvault Launcher v3.0<br />
+          Ankhvault Launcher<br />
           Duat Studio &copy; 2026
         </p>
       </div>
