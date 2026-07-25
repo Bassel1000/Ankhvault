@@ -1,6 +1,6 @@
 [package]
 name = "ankhvault-launcher"
-version = "1.0.2"
+version = "1.0.3"
 description = "Ankhvault Next-Gen Desktop Gaming Launcher & Store by Duat Studio"
 authors = ["Duat Studio"]
 edition = "2021"

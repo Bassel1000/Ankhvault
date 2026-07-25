@@ -29,6 +29,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VITE_SUPABASE_URL: "https://nehtpnrmkipmikutcjbr.supabase.co"
+          VITE_SUPABASE_ANON_KEY: "sb_publishable_6eDmlkZxa0YnaWb6KkwRIQ_XtcNVlze"
         with:
           tagName: v__VERSION__
           releaseName: "Ankhvault Launcher v__VERSION__"
