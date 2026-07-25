@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, User, LogOut } from 'lucide-react';
+import ankhvaultLogo from '../assets/ankhvault-logo.png';
 
 interface TopBarProps {
   currentUsername: string;
@@ -19,9 +20,9 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Brand Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <img 
-          src="/assets/Ankhvault Logo.png" 
+          src={ankhvaultLogo} 
           alt="Ankhvault Logo" 
-          style={{ width: '42px', height: '42px', filter: 'drop-shadow(0 0 8px rgba(212, 175, 55, 0.4))' }} 
+          style={{ width: '42px', height: '42px', filter: 'drop-shadow(0 0 8px rgba(212, 175, 55, 0.4))', objectFit: 'contain' }} 
         />
         <div>
           <h1 style={{ fontFamily: 'var(--font-cinzel)', color: 'var(--accent-gold)', fontSize: '1.4rem', fontWeight: 700, letterSpacing: '0.05em' }}>

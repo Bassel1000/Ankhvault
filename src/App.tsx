@@ -122,8 +122,7 @@ export const App: React.FC = () => {
     if (isTauriAvailable()) {
       return await invoke<boolean>('authenticate_user', { username: u, password: p });
     }
-    // Fallback web preview credentials
-    return (u === 'admin' && p === 'admin123') || (u === 'demo' && p === 'demo') || (u === 'guest' && p === 'guest123');
+    return u.trim().length > 0 && p.trim().length > 0;
   };
 
   const handleRegister = async (u: string, e: string, p: string): Promise<boolean> => {

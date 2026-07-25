@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, User, Mail, ShieldAlert } from 'lucide-react';
+import ankhvaultLogo from '../assets/ankhvault-logo.png';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -61,22 +62,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const fillQuickAccount = (user: string, pass: string) => {
-    setUsername(user);
-    setPassword(pass);
-    setIsRegisterMode(false);
-    setErrorMsg('');
-  };
-
   return (
     <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(5, 7, 10, 0.92)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200 }}>
       <div className="glass-panel animate-fade-in" style={{ width: '420px', padding: '36px', border: '1px solid var(--accent-gold)' }}>
         {/* Brand Emblem */}
         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <img 
-            src="/assets/Ankhvault Logo.png" 
+            src={ankhvaultLogo} 
             alt="Ankhvault Logo" 
-            style={{ width: '64px', height: '64px', margin: '0 auto 12px auto', filter: 'drop-shadow(0 0 12px rgba(212, 175, 55, 0.5))' }} 
+            style={{ width: '64px', height: '64px', margin: '0 auto 12px auto', filter: 'drop-shadow(0 0 12px rgba(212, 175, 55, 0.5))', objectFit: 'contain' }} 
           />
           <h2 style={{ fontFamily: 'var(--font-cinzel)', color: 'var(--accent-gold)', fontSize: '1.6rem', fontWeight: 700 }}>
             {isRegisterMode ? 'CREATE VAULT ACCOUNT' : 'ANKHVAULT ACCESS'}
@@ -85,26 +79,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             Enterprise Encrypted Vault Gateway by Duat Studio
           </p>
         </div>
-
-        {/* Quick Fill Preset Buttons */}
-        {!isRegisterMode && (
-          <div style={{ marginBottom: '20px', padding: '10px', backgroundColor: 'rgba(11, 14, 20, 0.6)', borderRadius: '8px', border: '1px solid var(--border-stroke)' }}>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px', textAlign: 'center' }}>
-              DEMO QUICK SIGN-IN
-            </span>
-            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-              <button type="button" onClick={() => fillQuickAccount('admin', 'admin123')} className="btn-outline" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
-                admin
-              </button>
-              <button type="button" onClick={() => fillQuickAccount('demo', 'demo')} className="btn-outline" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
-                demo
-              </button>
-              <button type="button" onClick={() => fillQuickAccount('guest', 'guest123')} className="btn-outline" style={{ padding: '4px 10px', fontSize: '0.75rem' }}>
-                guest
-              </button>
-            </div>
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
