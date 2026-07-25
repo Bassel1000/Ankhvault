@@ -9,13 +9,16 @@ import { CartView } from './components/CartView';
 import { GameItem } from './components/GameCard';
 import { MoonPayCheckoutModal } from './components/MoonPayCheckoutModal';
 import { AuthModal } from './components/AuthModal';
+import { AccountModal } from './components/AccountModal';
 import './styles/glassmorphism.css';
 
 import {
   fetchCatalogFromSupabase,
   fetchUserLibrarySupabase,
   syncUserLibrarySupabase,
-  recordX402TransactionSupabase,
+  registerUserProfileSupabase,
+  updateUsernameSupabase,
+  deleteUserProfileSupabase,
 } from './lib/supabase';
 
 export const App: React.FC = () => {
@@ -30,6 +33,7 @@ export const App: React.FC = () => {
   const [installProgressMap, setInstallProgressMap] = useState<Record<string, { percentage: number; status: string }>>({});
   
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -126,10 +130,15 @@ export const App: React.FC = () => {
   };
 
   const handleRegister = async (u: string, e: string, p: string): Promise<boolean> => {
+    let success = true;
     if (isTauriAvailable()) {
-      return await invoke<boolean>('register_user', { username: u, email: e, password: p });
+      success = await invoke<boolean>('register_user', { username: u, email: e, password: p });
     }
-    return true;
+    if (success) {
+      // Sync user profile to Supabase database so accounts persist!
+      await registerUserProfileSupabase(u, e);
+    }
+    return success;
   };
 
   const handleLoginSuccess = (username: string) => {
@@ -141,7 +150,57 @@ export const App: React.FC = () => {
     setCurrentUser(null);
     setUserCart([]);
     setUserLibrary([]);
+    setIsAccountModalOpen(false);
     showToast('Logged out successfully.');
+  };
+
+  // Account Management Handlers
+  const handleChangeUsername = async (newUsername: string): Promise<{ success: boolean; message: string }> => {
+    if (!currentUser) return { success: false, message: 'Not logged in' };
+
+    let success = true;
+    if (isTauriAvailable()) {
+      success = await invoke<boolean>('change_username', { oldUsername: currentUser, newUsername });
+    }
+
+    if (!success) {
+      return { success: false, message: 'Username is already taken' };
+    }
+
+    // Sync username update to Supabase Cloud
+    await updateUsernameSupabase(currentUser, newUsername);
+    setCurrentUser(newUsername);
+    showToast(`Username changed to ${newUsername}!`);
+    return { success: true, message: 'Username updated' };
+  };
+
+  const handleChangePassword = async (newPassword: string): Promise<{ success: boolean; message: string }> => {
+    if (!currentUser) return { success: false, message: 'Not logged in' };
+
+    let success = true;
+    if (isTauriAvailable()) {
+      success = await invoke<boolean>('change_password', { username: currentUser, newPassword });
+    }
+
+    if (success) {
+      showToast('Password updated successfully!');
+      return { success: true, message: 'Password updated' };
+    }
+    return { success: false, message: 'Password update failed' };
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!currentUser) return;
+
+    if (isTauriAvailable()) {
+      await invoke('delete_user', { username: currentUser });
+    }
+
+    // Delete user profile & library from Supabase Cloud
+    await deleteUserProfileSupabase(currentUser);
+
+    showToast('Account permanently deleted.');
+    handleLogout();
   };
 
   // Cart & Library Handlers
@@ -187,29 +246,6 @@ export const App: React.FC = () => {
     }
 
     setUserCart([]);
-  };
-
-  // MoonPay Commerce Checkout Handlers
-  const handleVerifyTransaction = async (orderId: string, tokenSymbol: string, amountUsd: number) => {
-    if (isTauriAvailable()) {
-      return await invoke<{ success: boolean; message: string }>('verify_moonpay_payment', {
-        orderId,
-        tokenSymbol,
-        amountUsd,
-      });
-    }
-
-    if (!orderId || orderId.trim().length < 5) {
-      return {
-        success: false,
-        message: 'Invalid MoonPay Commerce Order ID. Please check your purchase confirmation.',
-      };
-    }
-
-    return {
-      success: true,
-      message: `MoonPay Commerce Order ${orderId} Verified Successfully!`,
-    };
   };
 
   const handlePaymentSuccess = async () => {
@@ -296,6 +332,7 @@ export const App: React.FC = () => {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             onLogout={handleLogout}
+            onOpenAccountModal={() => setIsAccountModalOpen(true)}
           />
 
           {/* Main Content Layout */}
@@ -360,7 +397,16 @@ export const App: React.FC = () => {
             devWalletSol={catalog.find((g) => userCart.includes(g.id))?.dev_wallet_sol}
             devWalletEvm={catalog.find((g) => userCart.includes(g.id))?.dev_wallet_evm}
             onPaymentSuccess={handlePaymentSuccess}
-            onVerifyTransaction={handleVerifyTransaction}
+          />
+
+          {/* Account Management Settings Modal */}
+          <AccountModal
+            isOpen={isAccountModalOpen}
+            onClose={() => setIsAccountModalOpen(false)}
+            currentUsername={currentUser}
+            onChangeUsername={handleChangeUsername}
+            onChangePassword={handleChangePassword}
+            onDeleteAccount={handleDeleteAccount}
           />
         </>
       )}

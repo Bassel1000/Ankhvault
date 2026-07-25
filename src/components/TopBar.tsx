@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, User, LogOut } from 'lucide-react';
+import { Search, User, LogOut, Settings } from 'lucide-react';
 import ankhvaultLogo from '../assets/ankhvault-logo.png';
 
 interface TopBarProps {
@@ -7,6 +7,7 @@ interface TopBarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   onLogout: () => void;
+  onOpenAccountModal: () => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -14,6 +15,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   searchQuery,
   setSearchQuery,
   onLogout,
+  onOpenAccountModal,
 }) => {
   return (
     <header className="glass-panel" style={{ borderRadius: 0, borderTop: 'none', borderLeft: 'none', borderRight: 'none', padding: '14px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 50 }}>
@@ -57,12 +59,18 @@ export const TopBar: React.FC<TopBarProps> = ({
           />
         </div>
 
-        {/* User Account Badge */}
-        <div className="glass-panel" style={{ padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '8px', borderColor: 'var(--border-stroke)' }}>
+        {/* User Account Badge (Click to open Account Management) */}
+        <div
+          onClick={onOpenAccountModal}
+          className="glass-panel glass-panel-interactive"
+          style={{ padding: '6px 14px', display: 'flex', alignItems: 'center', gap: '8px', borderColor: 'var(--accent-gold)', cursor: 'pointer' }}
+          title="Manage Account Settings & Profile"
+        >
           <User size={16} color="var(--accent-gold)" />
           <span style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '0.9rem' }}>
             {currentUsername}
           </span>
+          <Settings size={14} color="var(--accent-gold)" style={{ marginLeft: '4px' }} />
         </div>
 
         {/* Logout Button */}

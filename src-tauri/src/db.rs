@@ -121,6 +121,67 @@ impl DatabaseManager {
         }
     }
 
+    pub fn change_username(&self, old_username: &str, new_username: &str) -> Result<bool, String> {
+        let old_lower = old_username.trim().to_lowercase();
+        let new_lower = new_username.trim().to_lowercase();
+
+        if old_lower == new_lower {
+            return Ok(true);
+        }
+
+        let mut state = self.state.lock().map_err(|e| e.to_string())?;
+        if state.users.contains_key(&new_lower) {
+            return Ok(false); // Username taken
+        }
+
+        if let Some(mut account) = state.users.remove(&old_lower) {
+            account.username = new_username.trim().to_string();
+            state.users.insert(new_lower.clone(), account);
+
+            if let Some(lib) = state.user_libraries.remove(&old_lower) {
+                state.user_libraries.insert(new_lower.clone(), lib);
+            }
+            if let Some(cart) = state.user_carts.remove(&old_lower) {
+                state.user_carts.insert(new_lower, cart);
+            }
+
+            drop(state);
+            self.save_encrypted_database()?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    pub fn change_password(&self, username: &str, new_plain_password: &str) -> Result<bool, String> {
+        let lower_user = username.trim().to_lowercase();
+        let mut state = self.state.lock().map_err(|e| e.to_string())?;
+
+        if let Some(account) = state.users.get_mut(&lower_user) {
+            let salt = Self::generate_salt();
+            account.password_hash = Self::hash_password(new_plain_password, &salt);
+            account.salt = BASE64.encode(&salt);
+            drop(state);
+            self.save_encrypted_database()?;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    pub fn delete_user(&self, username: &str) -> Result<bool, String> {
+        let lower_user = username.trim().to_lowercase();
+        let mut state = self.state.lock().map_err(|e| e.to_string())?;
+
+        state.users.remove(&lower_user);
+        state.user_libraries.remove(&lower_user);
+        state.user_carts.remove(&lower_user);
+
+        drop(state);
+        self.save_encrypted_database()?;
+        Ok(true)
+    }
+
     pub fn get_user_library(&self, username: &str) -> Vec<String> {
         let lower_user = username.trim().to_lowercase();
         let state = self.state.lock().unwrap();

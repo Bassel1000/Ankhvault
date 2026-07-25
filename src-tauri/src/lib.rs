@@ -23,6 +23,21 @@ fn authenticate_user(state: State<'_, AppState>, username: String, password: Str
 }
 
 #[tauri::command]
+fn change_username(state: State<'_, AppState>, old_username: String, new_username: String) -> Result<bool, String> {
+    state.db.change_username(&old_username, &new_username)
+}
+
+#[tauri::command]
+fn change_password(state: State<'_, AppState>, username: String, new_password: String) -> Result<bool, String> {
+    state.db.change_password(&username, &new_password)
+}
+
+#[tauri::command]
+fn delete_user(state: State<'_, AppState>, username: String) -> Result<bool, String> {
+    state.db.delete_user(&username)
+}
+
+#[tauri::command]
 fn get_catalog() -> Vec<GameItem> {
     get_default_catalog()
 }
@@ -92,6 +107,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             register_user,
             authenticate_user,
+            change_username,
+            change_password,
+            delete_user,
             get_catalog,
             get_user_library,
             get_user_cart,

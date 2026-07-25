@@ -51,6 +51,62 @@ export async function fetchCatalogFromSupabase(): Promise<DbGame[] | null> {
   }
 }
 
+export async function registerUserProfileSupabase(username: string, email: string) {
+  try {
+    await supabase.from('user_profiles').upsert(
+      {
+        username,
+        email,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'username' }
+    );
+  } catch (err) {
+    console.warn('Supabase user profile register sync error:', err);
+  }
+}
+
+export async function updateUsernameSupabase(oldUsername: string, newUsername: string): Promise<boolean> {
+  try {
+    // 1. Check if newUsername is already taken in user_profiles
+    const { data: existing } = await supabase
+      .from('user_profiles')
+      .select('username')
+      .eq('username', newUsername)
+      .maybeSingle();
+
+    if (existing) {
+      return false; // Username taken
+    }
+
+    // 2. Update user_profiles
+    await supabase
+      .from('user_profiles')
+      .update({ username: newUsername, updated_at: new Date().toISOString() })
+      .eq('username', oldUsername);
+
+    // 3. Update user_libraries username reference
+    await supabase
+      .from('user_libraries')
+      .update({ username: newUsername })
+      .eq('username', oldUsername);
+
+    return true;
+  } catch (err) {
+    console.warn('Supabase update username error:', err);
+    return false;
+  }
+}
+
+export async function deleteUserProfileSupabase(username: string) {
+  try {
+    await supabase.from('user_libraries').delete().eq('username', username);
+    await supabase.from('user_profiles').delete().eq('username', username);
+  } catch (err) {
+    console.warn('Supabase delete user error:', err);
+  }
+}
+
 export async function registerDeveloperProfileSupabase(
   developerName: string,
   email: string,
