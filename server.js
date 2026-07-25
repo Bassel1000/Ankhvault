@@ -47,13 +47,12 @@ app.get('/api/v1/games', async (req, res) => {
 });
 
 app.post('/api/v1/dev/submit', async (req, res) => {
-  const { title, price, genre, developer, walletAddress, email, download_url, description, dev_wallet_sol } = req.body;
-  if (!title || price === undefined || !walletAddress || typeof title !== 'string' || typeof walletAddress !== 'string') {
-    return res.status(400).json({ success: false, error: 'Missing or invalid required fields (title, price, walletAddress)' });
+  const { title, price, genre, developer, email, download_url, description } = req.body;
+  if (!title || price === undefined || typeof title !== 'string') {
+    return res.status(400).json({ success: false, error: 'Missing or invalid required fields (title, price)' });
   }
 
   const cleanTitle = title.trim().replace(/[<>]/g, '');
-  const cleanWallet = walletAddress.trim();
   const parsedPrice = parseFloat(price);
 
   if (isNaN(parsedPrice) || parsedPrice < 0) {
@@ -75,8 +74,6 @@ app.post('/api/v1/dev/submit', async (req, res) => {
         tag: 'New Release',
         download_url: typeof download_url === 'string' ? download_url.trim() : '',
         developer_name: typeof developer === 'string' ? developer.trim().replace(/[<>]/g, '') : 'Independent Publisher',
-        dev_wallet_sol: dev_wallet_sol || null,
-        dev_wallet_evm: cleanWallet,
         is_active: false,
       }),
     });

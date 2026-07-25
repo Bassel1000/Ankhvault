@@ -19,8 +19,6 @@ export interface DbGame {
   tag: string;
   download_url: string;
   developer_name?: string;
-  dev_wallet_sol?: string;
-  dev_wallet_evm?: string;
 }
 
 export async function fetchCatalogFromSupabase(): Promise<DbGame[] | null> {
@@ -42,8 +40,6 @@ export async function fetchCatalogFromSupabase(): Promise<DbGame[] | null> {
       tag: item.tag,
       download_url: item.download_url,
       developer_name: item.developer_name || undefined,
-      dev_wallet_sol: item.dev_wallet_sol || undefined,
-      dev_wallet_evm: item.dev_wallet_evm || undefined,
     }));
   } catch (err) {
     console.warn('Supabase catalog fetch error:', err);
@@ -51,12 +47,13 @@ export async function fetchCatalogFromSupabase(): Promise<DbGame[] | null> {
   }
 }
 
-export async function registerUserProfileSupabase(username: string, email: string) {
+export async function registerUserProfileSupabase(username: string, email: string, role: 'player' | 'developer' = 'player') {
   try {
     await supabase.from('user_profiles').upsert(
       {
         username,
         email,
+        role,
         updated_at: new Date().toISOString(),
       },
       { onConflict: 'username' }
@@ -106,18 +103,13 @@ export async function deleteUserProfileSupabase(username: string) {
 
 export async function registerDeveloperProfileSupabase(
   developerName: string,
-  email: string,
-  devWalletSol: string,
-  devWalletEvm: string
+  email: string
 ) {
   try {
     await supabase.from('developer_profiles').upsert(
       {
         developer_name: developerName,
         email,
-        dev_wallet_sol: devWalletSol,
-        dev_wallet_evm: devWalletEvm,
-        payout_split_percent: 95.00,
       },
       { onConflict: 'developer_name' }
     );
