@@ -28,7 +28,7 @@ export const CartView: React.FC<CartViewProps> = ({
             SHOPPING CART ({cartGames.length})
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-            Review your selected titles before proceeding to MoonPay Commerce checkout.
+            Review your selected titles before proceeding to x402 Web3 checkout (Demo).
           </p>
         </div>
 
@@ -79,7 +79,7 @@ export const CartView: React.FC<CartViewProps> = ({
             ))}
           </div>
 
-          {/* Subtotal & MoonPay Checkout Card */}
+          {/* Subtotal & x402 Web3 Checkout Card */}
           <div className="glass-panel" style={{ padding: '24px', backgroundColor: 'rgba(212, 175, 55, 0.08)', border: '1px solid var(--accent-gold)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <span style={{ color: 'var(--text-secondary)', fontSize: '1rem', fontWeight: 600 }}>Total Subtotal</span>
@@ -92,7 +92,7 @@ export const CartView: React.FC<CartViewProps> = ({
               <ShieldCheck size={16} color="var(--accent-turquoise)" />
               {subtotal === 0
                 ? "Free games require zero payment verification."
-                : "Payments settled via MoonPay Commerce (Cards, Apple Pay, Google Pay, USDT, USDC)"}
+                : "Payments settled 1:1 via USD Stablecoin x402 Protocol Gateway (USDT / USDC Demo)"}
             </div>
 
             <button
@@ -100,7 +100,7 @@ export const CartView: React.FC<CartViewProps> = ({
               onClick={onCheckout}
               style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '1.05rem' }}
             >
-              {subtotal === 0 ? "Claim Free Games" : "Proceed to MoonPay Commerce Checkout"}
+              {subtotal === 0 ? "Claim Free Games" : "Proceed to x402 Web3 Checkout (Demo)"}
             </button>
           </div>
         </div>

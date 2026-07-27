@@ -9,7 +9,7 @@
   [![Rust](https://img.shields.io/badge/Rust-Tauri%202.0-orange.svg)](https://tauri.app/)
   [![UI](https://img.shields.io/badge/UI-React%20%2B%20CSS%20Glassmorphism-blue.svg)]()
   [![Security](https://img.shields.io/badge/Security-AES--256--GCM%20%2B%20SHA--256-green.svg)]()
-  [![Payments](https://img.shields.io/badge/Payments-MoonPay%20Commerce-indigo.svg)]()
+  [![Payments](https://img.shields.io/badge/Payments-x402%20Protocol%20(Demo)-indigo.svg)]()
   [![Company](https://img.shields.io/badge/Studio-Duat%20Studio-gold.svg)]()
   [![License](https://img.shields.io/badge/License-MIT-green.svg)]()
 
@@ -19,7 +19,7 @@
 
 ## 🏛️ About Ankhvault
 
-**Ankhvault** (by **Duat Studio**) is a state-of-the-art desktop gaming launcher, store, and game platform built with **Rust + Tauri 2.0** and **React CSS Glassmorphism**. Designed with a mythic, quiet, guardian-of-the-vault aesthetic, Ankhvault combines ultra-modern dark glassmorphism styling with high-performance GPU-accelerated graphics, an **AES-256-GCM encrypted persistent database**, a **MoonPay Commerce Gateway** (supporting Cards, Apple Pay, Google Pay, USDT, and USDC), automated ZIP package extraction, and native game process management.
+**Ankhvault** (by **Duat Studio**) is a state-of-the-art desktop gaming launcher, store, and game platform built with **Rust + Tauri 2.0** and **React CSS Glassmorphism**. Designed with a mythic, quiet, guardian-of-the-vault aesthetic, Ankhvault combines ultra-modern dark glassmorphism styling with high-performance GPU-accelerated graphics, an **AES-256-GCM encrypted persistent database**, an **x402 Payment Protocol Gateway (Demo)** (supporting USDT and USDC simulated Web3 settlement), automated ZIP package extraction, and native game process management.
 
 <div align="center">
   <img src="assets/Duat%20Studio%20Logo_Compressed.png" alt="Duat Studio Logo" width="320" />
@@ -51,9 +51,9 @@ Ankhvault features a custom dual-palette design system tailored for modern high-
 - 🎨 **GPU-Accelerated Glassmorphism UI**:
   - **Dark Glassmorphism**: High-contrast dark theme with electric gold accents, scarab turquoise highlights, backdrop blur panels, and smooth CSS transitions.
 
-- 💳 **Store Cart & MoonPay Commerce Payment Gateway**:
+- 💳 **Store Cart & x402 Web3 Payment Protocol (Demo)**:
   - **Game Catalog Pricing**: Free-to-play titles (`$0.00`) and premium games (`$4.99`, `$9.99`, `$14.99`).
-  - **MoonPay Commerce Checkout**: Built-in checkout widget supporting **Credit Cards**, **Debit Cards**, **Apple Pay**, **Google Pay**, **USDT**, and **USDC** with instant 1:1 USD settlement.
+  - **x402 Demo Checkout**: Built-in checkout widget supporting **USDT** and **USDC** simulated Web3 payment settlement.
   - **Automated Payouts**: 95% revenue split directly to developers.
 
 - 🚀 **Production Game Downloader & Launch Engine (`src-tauri/src/installer.rs`)**:

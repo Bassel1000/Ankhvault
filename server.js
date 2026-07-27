@@ -33,7 +33,7 @@ app.get('/api/v1/health', (req, res) => {
     version: '1.0.0',
     treasurySol: TREASURY_SOL,
     treasuryEvm: TREASURY_EVM,
-    paymentGateway: 'MoonPay Commerce',
+    paymentGateway: 'x402 Web3 Protocol (Demo)',
   });
 });
 
@@ -87,20 +87,16 @@ app.post('/api/v1/dev/submit', async (req, res) => {
   }
 });
 
-app.post('/api/v1/checkout/moonpay', (req, res) => {
-  const { orderId, currency, amount } = req.body;
-  if (!orderId || typeof orderId !== 'string' || orderId.trim().length < 5) {
-    return res.status(400).json({ success: false, error: 'Invalid or missing MoonPay Commerce Order ID' });
-  }
-
-  const cleanOrderId = orderId.trim();
+app.post('/api/v1/checkout/x402-demo', (req, res) => {
+  const { txHash, token, amount } = req.body;
+  const hash = (txHash && typeof txHash === 'string') ? txHash.trim() : `demo_x402_${Date.now()}`;
 
   res.json({
     success: true,
-    gateway: 'MoonPay Commerce',
-    orderId: cleanOrderId,
-    currency: currency || 'USD',
-    amountVerified: amount,
+    gateway: 'x402 Web3 Protocol (Demo)',
+    txHash: hash,
+    token: token || 'USDC',
+    amountVerified: amount || 0.0,
     ankhFeeCutPercent: 5.0,
     devPayoutPercent: 95.0,
     treasuryEvm: TREASURY_EVM,
@@ -143,7 +139,7 @@ app.get('/', (req, res) => {
       </header>
       <section class="hero">
         <h1>Ankhvault Desktop Launcher & Store</h1>
-        <p>A flagship product by Duat Studio. Empowering game developers worldwide with 95% revenue retention and MoonPay Commerce settlement.</p>
+        <p>A flagship product by Duat Studio. Empowering game developers worldwide with 95% revenue retention and x402 Web3 settlement.</p>
         <div>
           <a href="https://github.com/Duat-Studio/Ankhvault/releases" class="btn btn-primary" target="_blank">Download Client (.exe)</a>
           <a href="/api/v1/games" class="btn btn-outline" target="_blank">Explore API Catalog</a>
@@ -154,8 +150,8 @@ app.get('/', (req, res) => {
             <p>Developers keep 95% of every sale with instant settlement.</p>
           </div>
           <div class="card">
-            <h3>⚡ MoonPay Commerce Gateway</h3>
-            <p>Accept Cards, Apple Pay, Google Pay, USDT, and USDC.</p>
+            <h3>⚡ x402 Payment Protocol (Demo)</h3>
+            <p>Simulated 1:1 USD Stablecoin checkout (USDT & USDC).</p>
             <div class="vault">EVM Vault: ${TREASURY_EVM}</div>
             <div class="vault">Solana Vault: ${TREASURY_SOL}</div>
           </div>

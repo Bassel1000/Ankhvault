@@ -140,16 +140,16 @@ export async function fetchUserLibrarySupabase(username: string): Promise<string
   }
 }
 
-export async function recordMoonPayTransactionSupabase(
+export async function recordX402TransactionSupabase(
   username: string,
-  orderId: string,
+  txHash: string,
   tokenSymbol: string,
   amountUsd: number
 ) {
   try {
-    await supabase.from('moonpay_transactions').insert({
+    await supabase.from('x402_transactions').insert({
       username,
-      order_id: orderId,
+      tx_hash: txHash,
       token_symbol: tokenSymbol,
       amount_usd: amountUsd,
     });

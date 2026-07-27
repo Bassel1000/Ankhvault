@@ -7,7 +7,7 @@ import { StoreView } from './components/StoreView';
 import { LibraryView } from './components/LibraryView';
 import { CartView } from './components/CartView';
 import { GameItem } from './components/GameCard';
-import { MoonPayCheckoutModal } from './components/MoonPayCheckoutModal';
+import { X402CheckoutModal } from './components/X402CheckoutModal';
 import { AuthModal } from './components/AuthModal';
 import { AccountModal } from './components/AccountModal';
 import { UpdateModal } from './components/UpdateModal';
@@ -20,6 +20,7 @@ import {
   registerUserProfileSupabase,
   updateUsernameSupabase,
   deleteUserProfileSupabase,
+  recordX402TransactionSupabase,
 } from './lib/supabase';
 
 export const App: React.FC = () => {
@@ -250,10 +251,15 @@ export const App: React.FC = () => {
     setUserCart([]);
   };
 
-  const handlePaymentSuccess = async () => {
+  const handlePaymentSuccess = async (txHash?: string, tokenSymbol?: string) => {
     if (!currentUser) return;
 
     const newLibrary = Array.from(new Set([...userLibrary, ...userCart]));
+
+    // Record x402 transaction in Supabase
+    if (cartTotal > 0 && txHash) {
+      await recordX402TransactionSupabase(currentUser, txHash, tokenSymbol || 'USDC', cartTotal);
+    }
 
     // Sync to Supabase Cloud
     await syncUserLibrarySupabase(currentUser, userCart);
@@ -264,7 +270,7 @@ export const App: React.FC = () => {
 
     setUserLibrary(newLibrary);
     setUserCart([]);
-    showToast('Payment successful! Games synced to your Cloud Library.');
+    showToast('Payment verified! Games synced to your Cloud Library.');
     setActiveTab('library');
   };
 
@@ -392,8 +398,8 @@ export const App: React.FC = () => {
             </main>
           </div>
 
-          {/* MoonPay Commerce Checkout Modal */}
-          <MoonPayCheckoutModal
+          {/* x402 Web3 Demo Checkout Modal */}
+          <X402CheckoutModal
             isOpen={isCheckoutOpen}
             onClose={() => setIsCheckoutOpen(false)}
             totalAmount={cartTotal}
