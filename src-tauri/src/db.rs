@@ -9,18 +9,73 @@ use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
 use std::fs::{self, File};
 use std::io::{Read, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
-// Master AES-256 Key for database encryption (32 bytes)
-const AES_KEY_BYTES: &[u8; 32] = b"AnkhvaultEnterpriseDBKey256Bit!!";
+// ---------------------------------------------------------------------------
+// Encryption key management
+// ---------------------------------------------------------------------------
+
+/// Name of the per-device key file stored alongside the database.
+const KEY_FILE_NAME: &str = "ankh.key";
+
+/// Legacy hardcoded key used by installations prior to v1.1.0.
+/// Kept ONLY for migrating existing databases on first launch after upgrade.
+/// It is never used for new encryption operations.
+const LEGACY_KEY: &[u8; 32] = b"AnkhvaultEnterpriseDBKey256Bit!!";
+
+/// Load the 32-byte encryption key from `db_dir/ankh.key`, generating and
+/// persisting a fresh random key if the file does not yet exist.
+fn load_or_create_key(db_dir: &Path) -> [u8; 32] {
+    let key_path = db_dir.join(KEY_FILE_NAME);
+    if key_path.exists() {
+        if let Ok(mut f) = File::open(&key_path) {
+            let mut key = [0u8; 32];
+            if f.read_exact(&mut key).is_ok() {
+                return key;
+            }
+        }
+    }
+    generate_and_persist_key(&key_path)
+}
+
+fn generate_and_persist_key(key_path: &Path) -> [u8; 32] {
+    let mut key = [0u8; 32];
+    rand::thread_rng().fill_bytes(&mut key);
+    if let Ok(mut f) = File::create(key_path) {
+        f.write_all(&key).ok();
+    }
+    key
+}
+
+/// Attempt to decrypt `db_path` using `key`. Returns `Ok(DatabaseState)` on
+/// success, `Err(String)` on any failure.
+fn try_decrypt_with_key(db_path: &Path, key: &[u8; 32]) -> Result<DatabaseState, String> {
+    let mut file = File::open(db_path).map_err(|e| e.to_string())?;
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer).map_err(|e| e.to_string())?;
+    if buffer.len() < 12 {
+        return Err("Database file too small or corrupt".to_string());
+    }
+    let (nonce_bytes, ciphertext) = buffer.split_at(12);
+    let cipher = Aes256Gcm::new(key.into());
+    let nonce = Nonce::from_slice(nonce_bytes);
+    let plaintext = cipher
+        .decrypt(nonce, ciphertext)
+        .map_err(|e| format!("Decryption error: {:?}", e))?;
+    serde_json::from_slice(&plaintext).map_err(|e| e.to_string())
+}
+
+// ---------------------------------------------------------------------------
+// Data types
+// ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserAccount {
     pub username: String,
     pub email: String,
     pub password_hash: String,
-    pub salt: String, // Base64 encoded salt
+    pub salt: String, // Base64-encoded salt
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -30,10 +85,16 @@ pub struct DatabaseState {
     pub user_carts: HashMap<String, HashSet<String>>,
 }
 
+// ---------------------------------------------------------------------------
+// DatabaseManager
+// ---------------------------------------------------------------------------
+
 #[derive(Clone)]
 pub struct DatabaseManager {
     state: Arc<Mutex<DatabaseState>>,
     db_file_path: PathBuf,
+    /// Per-device AES-256-GCM encryption key loaded from ankh.key.
+    encryption_key: [u8; 32],
 }
 
 impl DatabaseManager {
@@ -42,19 +103,35 @@ impl DatabaseManager {
             .unwrap_or_else(|| PathBuf::from("."))
             .join("Ankhvault");
         fs::create_dir_all(&db_dir).ok();
+
         let db_file_path = db_dir.join("ankh_database.db");
+
+        // Load (or generate) the per-device key. This will create ankh.key on
+        // first run or any time the file is missing.
+        let encryption_key = load_or_create_key(&db_dir);
 
         let mut db = DatabaseManager {
             state: Arc::new(Mutex::new(DatabaseState::default())),
-            db_file_path,
+            db_file_path: db_file_path.clone(),
+            encryption_key,
         };
 
-        if db.db_file_path.exists() {
-            if let Ok(loaded_state) = db.load_encrypted_database() {
-                *db.state.lock().unwrap() = loaded_state;
+        if db_file_path.exists() {
+            // First, attempt to decrypt with the per-device key (normal path).
+            if let Ok(loaded) = try_decrypt_with_key(&db_file_path, &db.encryption_key) {
+                *db.state.lock().unwrap() = loaded;
             } else {
-                db.seed_defaults();
-                db.save_encrypted_database().ok();
+                // Key mismatch — this is a pre-v1.1.0 database using the legacy
+                // hardcoded key. Migrate it: decrypt with the old key and
+                // immediately re-encrypt with the new per-device key.
+                if let Ok(loaded) = try_decrypt_with_key(&db_file_path, LEGACY_KEY) {
+                    *db.state.lock().unwrap() = loaded;
+                    db.save_encrypted_database().ok();
+                } else {
+                    // Database unreadable; start fresh rather than crash.
+                    db.seed_defaults();
+                    db.save_encrypted_database().ok();
+                }
             }
         } else {
             db.seed_defaults();
@@ -65,8 +142,12 @@ impl DatabaseManager {
     }
 
     fn seed_defaults(&mut self) {
-        // Dynamic initialization on first run (no hardcoded default admin accounts)
+        // Dynamic initialization on first run — no hardcoded default accounts.
     }
+
+    // ---------------------------------------------------------------------------
+    // Password utilities
+    // ---------------------------------------------------------------------------
 
     pub fn generate_salt() -> Vec<u8> {
         let mut salt = vec![0u8; 16];
@@ -80,6 +161,10 @@ impl DatabaseManager {
         hasher.update(password.as_bytes());
         BASE64.encode(hasher.finalize())
     }
+
+    // ---------------------------------------------------------------------------
+    // User management
+    // ---------------------------------------------------------------------------
 
     pub fn register_user(&self, username: &str, email: &str, plain_password: &str) -> Result<bool, String> {
         let lower_user = username.trim().to_lowercase();
@@ -103,7 +188,7 @@ impl DatabaseManager {
         state.user_libraries.entry(lower_user.clone()).or_default();
         state.user_carts.entry(lower_user).or_default();
 
-        drop(state); // unlock before saving
+        drop(state);
         self.save_encrypted_database()?;
         Ok(true)
     }
@@ -131,7 +216,7 @@ impl DatabaseManager {
 
         let mut state = self.state.lock().map_err(|e| e.to_string())?;
         if state.users.contains_key(&new_lower) {
-            return Ok(false); // Username taken
+            return Ok(false);
         }
 
         if let Some(mut account) = state.users.remove(&old_lower) {
@@ -181,6 +266,10 @@ impl DatabaseManager {
         self.save_encrypted_database()?;
         Ok(true)
     }
+
+    // ---------------------------------------------------------------------------
+    // Library & cart
+    // ---------------------------------------------------------------------------
 
     pub fn get_user_library(&self, username: &str) -> Vec<String> {
         let lower_user = username.trim().to_lowercase();
@@ -246,39 +335,26 @@ impl DatabaseManager {
         self.save_encrypted_database()
     }
 
-    // Encrypted Storage Persistence via AES-256-GCM
+    // ---------------------------------------------------------------------------
+    // Encrypted persistence (AES-256-GCM)
+    // ---------------------------------------------------------------------------
+
     fn save_encrypted_database(&self) -> Result<(), String> {
         let state = self.state.lock().map_err(|e| e.to_string())?;
         let json_bytes = serde_json::to_vec(&*state).map_err(|e| e.to_string())?;
 
-        let cipher = Aes256Gcm::new(AES_KEY_BYTES.into());
+        let cipher = Aes256Gcm::new(&self.encryption_key.into());
         let mut nonce_bytes = [0u8; 12];
         rand::thread_rng().fill_bytes(&mut nonce_bytes);
         let nonce = Nonce::from_slice(&nonce_bytes);
 
-        let ciphertext = cipher.encrypt(nonce, json_bytes.as_ref()).map_err(|e| format!("Encryption error: {:?}", e))?;
+        let ciphertext = cipher
+            .encrypt(nonce, json_bytes.as_ref())
+            .map_err(|e| format!("Encryption error: {:?}", e))?;
 
         let mut file = File::create(&self.db_file_path).map_err(|e| e.to_string())?;
         file.write_all(&nonce_bytes).map_err(|e| e.to_string())?;
         file.write_all(&ciphertext).map_err(|e| e.to_string())?;
         Ok(())
-    }
-
-    fn load_encrypted_database(&self) -> Result<DatabaseState, String> {
-        let mut file = File::open(&self.db_file_path).map_err(|e| e.to_string())?;
-        let mut buffer = Vec::new();
-        file.read_to_end(&mut buffer).map_err(|e| e.to_string())?;
-
-        if buffer.len() < 12 {
-            return Err("Database file corrupt or too small".to_string());
-        }
-
-        let (nonce_bytes, ciphertext) = buffer.split_at(12);
-        let cipher = Aes256Gcm::new(AES_KEY_BYTES.into());
-        let nonce = Nonce::from_slice(nonce_bytes);
-
-        let plaintext = cipher.decrypt(nonce, ciphertext).map_err(|e| format!("Decryption error: {:?}", e))?;
-        let state: DatabaseState = serde_json::from_slice(&plaintext).map_err(|e| e.to_string())?;
-        Ok(state)
     }
 }

@@ -1,10 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-const DEFAULT_SUPABASE_URL = 'https://nehtpnrmkipmikutcjbr.supabase.co';
-const DEFAULT_SUPABASE_KEY = 'sb_publishable_6eDmlkZxa0YnaWb6KkwRIQ_XtcNVlze';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_KEY;
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase environment variables.\n' +
+    'Copy .env.example to .env and fill in your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY values.'
+  );
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
@@ -136,24 +140,28 @@ export async function fetchUserLibrarySupabase(username: string): Promise<string
     if (error || !data) return null;
     return data.map((row) => row.game_id);
   } catch (err) {
+    console.warn('Supabase fetch library error:', err);
     return null;
   }
 }
 
 export async function recordX402TransactionSupabase(
   username: string,
-  txHash: string,
+  txHash: string | undefined,
   tokenSymbol: string,
   amountUsd: number
 ) {
   try {
-    await supabase.from('x402_transactions').insert({
-      username,
-      tx_hash: txHash,
-      token_symbol: tokenSymbol,
-      amount_usd: amountUsd,
-    });
+    await supabase.from('transactions').insert([
+      {
+        username,
+        tx_hash: txHash || `demo_${Date.now()}`,
+        token_symbol: tokenSymbol,
+        amount_usd: amountUsd,
+        created_at: new Date().toISOString(),
+      },
+    ]);
   } catch (err) {
-    console.warn('Supabase transaction record error:', err);
+    console.warn('Supabase record transaction error:', err);
   }
 }

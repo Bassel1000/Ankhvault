@@ -4,10 +4,29 @@ import cors from 'cors';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://nehtpnrmkipmikutcjbr.supabase.co';
+// Required: set VITE_SUPABASE_URL in your deployment environment.
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+
+// The server uses SUPABASE_SERVICE_ROLE_KEY for write operations (bypasses RLS).
+// NEVER expose the service role key to frontend code or commit it to source control.
+// For read-only public endpoints the anon key is acceptable as a fallback,
+// but write endpoints (e.g. /api/v1/dev/submit) should always have the service role key set.
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-const TREASURY_SOL = process.env.TREASURY_SOL || '2JxDavSJ9de1twMxDxdqz1sV3vkpYVDpPbx8qTy6q2cS';
-const TREASURY_EVM = process.env.TREASURY_EVM || '0x5efe4d14d5f406bb748fab14a3e2cda06e51a986';
+
+// Treasury wallet addresses (public blockchain addresses — not private keys).
+// These are intentionally visible in the UI for payment routing transparency.
+const TREASURY_SOL = process.env.TREASURY_SOL;
+const TREASURY_EVM = process.env.TREASURY_EVM;
+
+if (!SUPABASE_URL) {
+  console.error('ERROR: VITE_SUPABASE_URL environment variable is not set. Exiting.');
+  process.exit(1);
+}
+
+if (!SUPABASE_KEY) {
+  console.error('ERROR: Neither SUPABASE_SERVICE_ROLE_KEY nor VITE_SUPABASE_ANON_KEY is set. Exiting.');
+  process.exit(1);
+}
 
 app.use(cors());
 app.use(express.json());
@@ -31,8 +50,8 @@ app.get('/api/v1/health', (req, res) => {
     platform: 'Ankhvault Cloud',
     studio: 'Duat Studio',
     version: '1.0.0',
-    treasurySol: TREASURY_SOL,
-    treasuryEvm: TREASURY_EVM,
+    treasurySol: TREASURY_SOL || 'not configured',
+    treasuryEvm: TREASURY_EVM || 'not configured',
     paymentGateway: 'x402 Web3 Protocol (Demo)',
   });
 });
@@ -99,7 +118,7 @@ app.post('/api/v1/checkout/x402-demo', (req, res) => {
     amountVerified: amount || 0.0,
     ankhFeeCutPercent: 5.0,
     devPayoutPercent: 95.0,
-    treasuryEvm: TREASURY_EVM,
+    treasuryEvm: TREASURY_EVM || 'not configured',
     status: 'completed',
   });
 });
@@ -128,7 +147,6 @@ app.get('/', (req, res) => {
         .card { background: rgba(255,255,255,0.04); border: 1px solid #2A3447; border-radius: 12px; padding: 28px; }
         .card h3 { color: #D4AF37; font-size: 16px; font-weight: 700; margin-bottom: 10px; }
         .card p { font-size: 14px; margin-bottom: 0; }
-        .vault { font-family: monospace; font-size: 12px; color: #17919E; margin-top: 8px; word-break: break-all; }
         footer { padding: 24px; text-align: center; font-size: 14px; color: #94A3B8; border-top: 1px solid #2A3447; }
       </style>
     </head>
@@ -152,12 +170,10 @@ app.get('/', (req, res) => {
           <div class="card">
             <h3>⚡ x402 Payment Protocol (Demo)</h3>
             <p>Simulated 1:1 USD Stablecoin checkout (USDT & USDC).</p>
-            <div class="vault">EVM Vault: ${TREASURY_EVM}</div>
-            <div class="vault">Solana Vault: ${TREASURY_SOL}</div>
           </div>
           <div class="card">
             <h3>🔒 AES-256 Vault Security</h3>
-            <p>SHA-256 salted password hashing and AES-256-GCM binary database encryption.</p>
+            <p>Per-device key generation and AES-256-GCM binary database encryption.</p>
           </div>
         </div>
       </section>
