@@ -92,5 +92,16 @@ npm run tauri:dev
 
 ---
 
+## 📁 Workspace & Repositories
+
+| Repository / Directory | Purpose | Remote URL |
+| :--- | :--- | :--- |
+| **Ankhvault** (Root `/`) | Desktop Gaming Launcher & Store (Tauri 2.0 + Rust) | [github.com/Duat-Studio/Ankhvault](https://github.com/Duat-Studio/Ankhvault) |
+| **Duat Studio Website** (`/Duat_Studio_Website/`) | Official Web Portal & Developer Hub (Vite + React) | [github.com/Duat-Studio/Duat-Studio](https://github.com/Duat-Studio/Duat-Studio) |
+
+For detailed workspace mapping, see [REPOSITORY_MAP.md](file:///d:/Duat%20Studios/REPOSITORY_MAP.md).
+
+---
+
 ## 📜 License
 Distributed under the **MIT License**. See `LICENSE` for details.
