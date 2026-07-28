@@ -1,6 +1,10 @@
 <div align="center">
 
-  <img src="assets/Ankhvault%20Logo.png" alt="Ankhvault Logo" width="180" />
+  <a href="https://github.com/Duat-Studio">
+    <img src="assets/Duat%20Studio%20Logo_Compressed.png" alt="Duat Studio Logo" width="340" />
+  </a>
+  <br /><br />
+  <img src="assets/Ankhvault%20Logo.png" alt="Ankhvault Logo" width="160" />
   
   # ☥ Ankhvault
   ### Next-Generation Desktop Gaming Launcher & Store
@@ -79,8 +83,12 @@ npm run tauri:dev
 
 ## 🏢 Organization
 
-**Duat Studio**  
-*Building next-generation gaming experiences and secure client software.*
+<div align="center">
+  <img src="assets/Duat%20Studio%20Logo_Compressed.png" alt="Duat Studio Logo" width="260" />
+  <br /><br />
+  <b>Duat Studio</b><br />
+  <i>Building next-generation gaming experiences and secure client software.</i>
+</div>
 
 ---
 
